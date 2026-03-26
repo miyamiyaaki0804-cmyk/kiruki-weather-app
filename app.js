@@ -214,6 +214,95 @@ const SAMPLE_NATIONAL_FEED = [
   }
 ];
 
+// ===== MOUNTAINS DATA =====
+const MOUNTAINS = {
+  fuji: {
+    name: '富士山', elevation: 3776, region: 'chubu', emoji: '🗻',
+    type: 'volcano',
+    desc: '日本最高峰。山頂の気温は平地より約24°C低く、真夏でも氷点下になる。冬季は-30°C以下になることも。'
+  },
+  alps: {
+    name: '北アルプス（穂高岳）', elevation: 3190, region: 'chubu', emoji: '🏔️',
+    type: 'mountain',
+    desc: '槍ヶ岳・穂高岳など3000m超が連なる日本アルプス最高峰地帯。高山植物と雪渓が美しい。'
+  },
+  hakusan: {
+    name: '白山', elevation: 2702, region: 'chubu', emoji: '🏔️',
+    type: 'mountain',
+    desc: '石川・岐阜・福井・富山の県境に位置する霊山。日本三名山の一つ。山頂付近は万年雪が残る。'
+  },
+  daisetsu: {
+    name: '大雪山', elevation: 2291, region: 'hokkaido', emoji: '🏔️',
+    type: 'mountain',
+    desc: '北海道の屋根。初雪は例年8月下旬で北海道に秋の到来を告げる。ヒグマの生息地でもある。'
+  },
+  aso: {
+    name: '阿蘇山', elevation: 1592, region: 'kyushu', emoji: '🌋',
+    type: 'volcano',
+    desc: '世界最大級のカルデラを持つ活火山。火山活動により登山規制あり。農産物が育む大自然の恵みも。'
+  }
+};
+
+// ===== AUTH MODULE =====
+const Auth = {
+  currentTab: 'login',
+
+  init() {
+    const saved = localStorage.getItem('kiruki_user');
+    if (saved) {
+      State.user = JSON.parse(saved);
+      return true;
+    }
+    return false;
+  },
+
+  switchTab(tab, btn) {
+    this.currentTab = tab;
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('auth-login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('auth-register-form').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('reg-error').textContent = '';
+  },
+
+  login() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    if (!email || !password) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
+    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) { errEl.textContent = 'メールアドレスまたはパスワードが違います'; return; }
+    localStorage.setItem('kiruki_user', JSON.stringify(user));
+    State.user = user;
+    App.launchApp();
+  },
+
+  register() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const errEl = document.getElementById('reg-error');
+    if (!name || !email || !password) { errEl.textContent = '全ての項目を入力してください'; return; }
+    if (password.length < 6) { errEl.textContent = 'パスワードは6文字以上必要です'; return; }
+    if (!email.includes('@')) { errEl.textContent = '正しいメールアドレスを入力してください'; return; }
+    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
+    if (users.find(u => u.email === email)) { errEl.textContent = 'このメールは既に登録されています'; return; }
+    const user = { name, email, password, id: Date.now().toString(), emoji: '😊' };
+    users.push(user);
+    localStorage.setItem('kiruki_users', JSON.stringify(users));
+    localStorage.setItem('kiruki_user', JSON.stringify(user));
+    State.user = user;
+    App.launchApp();
+  },
+
+  continueAsGuest() {
+    State.user = { name: 'ゲスト', email: '', id: 'guest', emoji: '👤' };
+    App.launchApp();
+  }
+};
+
 // ===== TEMPERATURE COLOR UTIL =====
 function tempColor(temp) {
   if (temp < 0)  return '#6366F1';
@@ -305,14 +394,21 @@ const State = {
   started: false,
   currentView: 'home',
   currentGroup: 'personal',
-  wardrobeFilter: 'all',
+  wardrobeFilter: 'cold',
   selectedFeeling: null,
   photoDataUrl: null,
   wardrobe: [],
+  user: null,
 
   init() {
     const saved = localStorage.getItem('kiruki_wardrobe');
     this.wardrobe = saved ? JSON.parse(saved) : [...SAMPLE_WARDROBE];
+    // Restore any generated invite code
+    const code = localStorage.getItem('kiruki_my_code');
+    if (code) {
+      const el = document.getElementById('my-invite-code');
+      if (el) el.textContent = code;
+    }
   },
 
   saveWardrobe() {
@@ -323,15 +419,32 @@ const State = {
 // ===== APP =====
 const App = {
 
-  start() {
+  goToAuth() {
+    document.getElementById('view-intro').classList.add('hidden');
+    document.getElementById('view-auth').classList.add('active');
+  },
+
+  launchApp() {
     State.started = true;
     State.init();
-    document.getElementById('view-intro').classList.add('hidden');
+    document.getElementById('view-auth').classList.remove('active');
+    document.getElementById('view-auth').classList.add('slide-out');
     document.getElementById('bottom-nav').style.display = 'flex';
     this.navigate('home');
     this.initHome();
     this.initMap();
+    // Update user name if shown
+    if (State.user?.name) {
+      const el = document.getElementById('my-invite-code');
+      if (el && el.textContent === '------') {
+        const saved = localStorage.getItem('kiruki_my_code');
+        if (saved) el.textContent = saved;
+      }
+    }
   },
+
+  // Legacy alias
+  start() { this.goToAuth(); },
 
   navigate(view) {
     // hide all
@@ -498,12 +611,16 @@ const App = {
   // ===== WARDROBE =====
   renderWardrobe(filter) {
     filter = filter || State.wardrobeFilter;
-    let items = [...State.wardrobe];
+    const allItems = [...State.wardrobe];
+    let items = allItems;
 
-    if (filter === 'cold') items = items.filter(i => i.temp < 8);
-    else if (filter === 'cool') items = items.filter(i => i.temp >= 8 && i.temp < 15);
-    else if (filter === 'warm') items = items.filter(i => i.temp >= 15 && i.temp < 22);
-    else if (filter === 'hot') items = items.filter(i => i.temp >= 22);
+    if (filter === 'cold') items = allItems.filter(i => i.temp < 8);
+    else if (filter === 'cool') items = allItems.filter(i => i.temp >= 8 && i.temp < 15);
+    else if (filter === 'warm') items = allItems.filter(i => i.temp >= 15 && i.temp < 22);
+    else if (filter === 'hot') items = allItems.filter(i => i.temp >= 22);
+
+    // If current filter has no items, show all
+    if (items.length === 0 && allItems.length > 0) items = allItems;
 
     const grid = document.getElementById('wardrobe-grid');
     const empty = document.getElementById('wardrobe-empty');
@@ -759,7 +876,126 @@ const App = {
     State.currentGroup = group;
     document.querySelectorAll('.group-tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    const codeSection = document.getElementById('friend-code-section');
+    if (codeSection) codeSection.style.display = group === 'friends' ? 'block' : 'none';
+    if (group === 'friends') this.renderMyGroups();
     this.renderGroupFeed();
+  },
+
+  // ===== MOUNTAINS =====
+  showMountain(key) {
+    const m = MOUNTAINS[key];
+    if (!m) return;
+    const region = JAPAN_WEATHER[m.region];
+    const summitTemp = region ? Math.round(region.temp - (m.elevation * 0.0065)) : '?';
+    const cold = typeof summitTemp === 'number' && summitTemp < 0;
+
+    document.getElementById('modal-region-title').textContent = `${m.emoji} ${m.name}`;
+    document.getElementById('modal-region-body').innerHTML = `
+      <div style="text-align:center;font-size:3rem;margin-bottom:8px">${m.emoji}</div>
+      <div style="text-align:center;color:var(--text-sub);font-size:0.82rem;line-height:1.5;margin-bottom:14px">${m.desc}</div>
+      <div class="region-detail-grid">
+        <div class="region-detail-item">
+          <div class="rdi-label">標高</div>
+          <div class="rdi-val">${m.elevation.toLocaleString()}m</div>
+        </div>
+        <div class="region-detail-item">
+          <div class="rdi-label">山頂気温(推定)</div>
+          <div class="rdi-val" style="color:${cold?'#2563EB':'inherit'}">${summitTemp}°C</div>
+        </div>
+        <div class="region-detail-item">
+          <div class="rdi-label">周辺地域</div>
+          <div class="rdi-val">${region?.name || '-'}</div>
+        </div>
+        <div class="region-detail-item">
+          <div class="rdi-label">地域気温</div>
+          <div class="rdi-val">${region?.temp ?? '-'}°C</div>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px 12px;font-size:0.78rem;color:var(--text-sub);margin-top:6px;line-height:1.5">
+        📐 気温低下率: 高度100m上昇につき約0.65°C低下<br>
+        ⚠️ 登山時は天気予報と装備を十分に確認してください
+      </div>
+      ${cold ? `<div style="background:#DBEAFE;border-radius:var(--radius-sm);padding:10px 12px;font-size:0.8rem;color:#1E40AF;margin-top:8px">❄️ 現在、山頂付近は氷点下の可能性があります</div>` : ''}
+    `;
+    this.openModal('modal-region');
+  },
+
+  // ===== GROUP CODES =====
+  generateGroupCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+
+    const groups = JSON.parse(localStorage.getItem('kiruki_groups') || '{}');
+    groups[code] = {
+      code,
+      name: `${State.user?.name || 'ゲスト'}のグループ`,
+      creatorId: State.user?.id || 'guest',
+      members: [State.user?.id || 'guest'],
+      created: new Date().toISOString()
+    };
+    localStorage.setItem('kiruki_groups', JSON.stringify(groups));
+
+    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    if (!myGroups.includes(code)) myGroups.push(code);
+    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups));
+    localStorage.setItem('kiruki_my_code', code);
+
+    document.getElementById('my-invite-code').textContent = code;
+    this.showToast(`コード発行: ${code}`);
+    this.renderMyGroups();
+  },
+
+  joinGroup() {
+    const input = document.getElementById('join-code-input');
+    const code = input.value.trim().toUpperCase();
+    if (code.length !== 6) { this.showToast('6文字のコードを入力してください'); return; }
+
+    const groups = JSON.parse(localStorage.getItem('kiruki_groups') || '{}');
+    if (!groups[code]) { this.showToast('グループが見つかりません'); return; }
+
+    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    if (myGroups.includes(code)) { this.showToast('既に参加しています'); return; }
+
+    if (!groups[code].members.includes(State.user?.id || 'guest')) {
+      groups[code].members.push(State.user?.id || 'guest');
+      localStorage.setItem('kiruki_groups', JSON.stringify(groups));
+    }
+    myGroups.push(code);
+    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups));
+    input.value = '';
+    this.showToast(`「${groups[code].name}」に参加しました！`);
+    this.renderMyGroups();
+  },
+
+  leaveGroup(code) {
+    if (!confirm('このグループから退出しますか？')) return;
+    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups.filter(c => c !== code)));
+    this.showToast('グループから退出しました');
+    this.renderMyGroups();
+  },
+
+  renderMyGroups() {
+    const container = document.getElementById('my-groups-list');
+    if (!container) return;
+    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    const groups = JSON.parse(localStorage.getItem('kiruki_groups') || '{}');
+    if (myGroups.length === 0) { container.innerHTML = ''; return; }
+    container.innerHTML = myGroups.map(code => {
+      const g = groups[code];
+      if (!g) return '';
+      return `
+        <div class="group-item">
+          <div class="group-item-icon">👥</div>
+          <div class="group-item-info">
+            <div class="group-item-name">${g.name}</div>
+            <div class="group-item-code">コード: ${g.code} · ${g.members.length}人参加中</div>
+          </div>
+          <button class="btn-leave-group" onclick="App.leaveGroup('${code}')">退出</button>
+        </div>`;
+    }).join('');
   },
 
   // ===== MODAL =====
@@ -787,5 +1023,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const shape = document.getElementById(`shape-${key}`);
     if (shape) shape.setAttribute('fill', tempColor(w.temp));
   });
-  document.getElementById('map-date') && (document.getElementById('map-date').textContent = '');
+  const mapDate = document.getElementById('map-date');
+  if (mapDate) mapDate.textContent = '';
+
+  // Auto-login returning user (skip intro + auth)
+  if (Auth.init()) {
+    document.getElementById('view-intro').classList.add('hidden');
+    App.launchApp();
+  }
 });

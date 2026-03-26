@@ -56,8 +56,69 @@
         </div>
       </div>
     </div>
-    <button class="btn-start" onclick="App.start()">はじめる →</button>
+    <button class="btn-start" onclick="App.goToAuth()">はじめる →</button>
     <p class="intro-note">* 位置情報・カメラはブラウザの許可が必要です</p>
+  </div>
+</div>
+
+<!-- ==================== AUTH VIEW ==================== -->
+<div id="view-auth" class="view auth-view">
+  <div class="auth-bg-grad"></div>
+  <div class="auth-scroll-wrap">
+    <div class="auth-header-logo">
+      <div class="auth-logo-icon">👕</div>
+      <h1 class="auth-logo-title">KiruKi</h1>
+      <p class="auth-logo-sub">着る気象アプリ</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="Auth.switchTab('login', this)">ログイン</button>
+        <button class="auth-tab" onclick="Auth.switchTab('register', this)">新規登録</button>
+      </div>
+
+      <!-- Login -->
+      <div id="auth-login-form">
+        <div class="auth-field">
+          <label class="auth-label">📧 メールアドレス</label>
+          <input type="email" id="login-email" class="auth-input" placeholder="example@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">🔒 パスワード</label>
+          <input type="password" id="login-password" class="auth-input" placeholder="パスワード" autocomplete="current-password">
+        </div>
+        <p class="auth-error" id="login-error"></p>
+        <button class="btn-auth-submit" onclick="Auth.login()">ログイン →</button>
+      </div>
+
+      <!-- Register -->
+      <div id="auth-register-form" style="display:none">
+        <div class="auth-field">
+          <label class="auth-label">😊 ニックネーム</label>
+          <input type="text" id="reg-name" class="auth-input" placeholder="ニックネーム" maxlength="20">
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">📧 メールアドレス</label>
+          <input type="email" id="reg-email" class="auth-input" placeholder="example@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">🔒 パスワード（6文字以上）</label>
+          <input type="password" id="reg-password" class="auth-input" placeholder="パスワード" autocomplete="new-password">
+        </div>
+        <p class="auth-error" id="reg-error"></p>
+        <button class="btn-auth-submit" onclick="Auth.register()">登録する →</button>
+      </div>
+
+      <div class="auth-divider"><span>または</span></div>
+      <button class="btn-auth-guest" onclick="Auth.continueAsGuest()">ゲストとして使う（データは端末に保存）</button>
+    </div>
+
+    <div class="auth-feature-strip">
+      <span>📸 コーデ記録</span><span>·</span>
+      <span>🌡️ AI提案</span><span>·</span>
+      <span>🗾 全国マップ</span><span>·</span>
+      <span>👥 グループ共有</span>
+    </div>
   </div>
 </div>
 
@@ -143,60 +204,148 @@
     <span class="legend-hot">暑</span>
   </div>
   <div class="japan-map-container">
-    <svg id="japan-map" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+    <svg id="japan-map" viewBox="0 0 380 590" xmlns="http://www.w3.org/2000/svg">
+      <!-- Sea background -->
+      <rect width="380" height="590" fill="#C8E6F5"/>
+      <text x="28" y="220" font-size="9" fill="rgba(79,142,247,0.28)" transform="rotate(-75 28 220)">日本海</text>
+      <text x="310" y="430" font-size="9" fill="rgba(79,142,247,0.28)">太平洋</text>
+
       <!-- Hokkaido -->
       <g class="region-group" data-region="hokkaido" onclick="App.showRegion('hokkaido')">
-        <ellipse cx="210" cy="50" rx="75" ry="38" class="region-shape" id="shape-hokkaido"/>
-        <text x="210" y="45" class="region-label">北海道</text>
-        <text x="210" y="62" class="region-temp" id="rtemp-hokkaido">3°</text>
+        <polygon points="295,120 285,96 290,68 308,42 316,16 332,20 356,44 374,72 370,96 342,114 318,122"
+                 class="region-shape" id="shape-hokkaido"/>
+        <text x="330" y="74" class="region-label">北海道</text>
+        <text x="330" y="91" class="region-temp" id="rtemp-hokkaido">3°</text>
+        <text x="310" y="80" class="region-city">札幌</text>
       </g>
+
       <!-- Tohoku -->
       <g class="region-group" data-region="tohoku" onclick="App.showRegion('tohoku')">
-        <ellipse cx="215" cy="120" rx="38" ry="42" class="region-shape" id="shape-tohoku"/>
-        <text x="215" y="116" class="region-label">東北</text>
-        <text x="215" y="132" class="region-temp" id="rtemp-tohoku">8°</text>
+        <polygon points="280,128 295,120 318,122 316,160 312,240 280,242 274,200 274,160"
+                 class="region-shape" id="shape-tohoku"/>
+        <text x="297" y="182" class="region-label">東北</text>
+        <text x="297" y="199" class="region-temp" id="rtemp-tohoku">8°</text>
+        <text x="297" y="213" class="region-city">仙台</text>
       </g>
+
       <!-- Kanto -->
       <g class="region-group" data-region="kanto" onclick="App.showRegion('kanto')">
-        <ellipse cx="205" cy="200" rx="36" ry="30" class="region-shape" id="shape-kanto"/>
-        <text x="205" y="196" class="region-label">関東</text>
-        <text x="205" y="212" class="region-temp" id="rtemp-kanto">18°</text>
+        <polygon points="280,242 312,240 312,262 305,280 300,302 284,318 268,308 264,292 265,268"
+                 class="region-shape" id="shape-kanto"/>
+        <text x="290" y="272" class="region-label">関東</text>
+        <text x="290" y="289" class="region-temp" id="rtemp-kanto">18°</text>
+        <text x="290" y="303" class="region-city">東京</text>
       </g>
+
       <!-- Chubu -->
       <g class="region-group" data-region="chubu" onclick="App.showRegion('chubu')">
-        <ellipse cx="175" cy="230" rx="34" ry="28" class="region-shape" id="shape-chubu"/>
-        <text x="175" y="226" class="region-label">中部</text>
-        <text x="175" y="242" class="region-temp" id="rtemp-chubu">14°</text>
+        <polygon points="265,268 264,292 248,314 236,298 226,272 232,250 244,240 258,244"
+                 class="region-shape" id="shape-chubu"/>
+        <text x="248" y="272" class="region-label">中部</text>
+        <text x="248" y="289" class="region-temp" id="rtemp-chubu">14°</text>
+        <text x="248" y="303" class="region-city">名古屋</text>
       </g>
+
       <!-- Kinki -->
       <g class="region-group" data-region="kinki" onclick="App.showRegion('kinki')">
-        <ellipse cx="155" cy="280" rx="34" ry="26" class="region-shape" id="shape-kinki"/>
-        <text x="155" y="276" class="region-label">近畿</text>
-        <text x="155" y="292" class="region-temp" id="rtemp-kinki">16°</text>
+        <polygon points="236,298 248,314 244,334 226,342 205,332 192,316 194,298 207,291 220,290"
+                 class="region-shape" id="shape-kinki"/>
+        <text x="220" y="312" class="region-label">近畿</text>
+        <text x="220" y="329" class="region-temp" id="rtemp-kinki">16°</text>
+        <text x="220" y="341" class="region-city">大阪</text>
       </g>
+
       <!-- Chugoku -->
       <g class="region-group" data-region="chugoku" onclick="App.showRegion('chugoku')">
-        <ellipse cx="120" cy="300" rx="36" ry="20" class="region-shape" id="shape-chugoku"/>
-        <text x="120" y="296" class="region-label">中国</text>
-        <text x="120" y="312" class="region-temp" id="rtemp-chugoku">14°</text>
+        <polygon points="192,316 205,332 190,328 165,325 135,318 116,314 118,302 130,292 152,290 175,294"
+                 class="region-shape" id="shape-chugoku"/>
+        <text x="154" y="308" class="region-label">中国</text>
+        <text x="154" y="325" class="region-temp" id="rtemp-chugoku">14°</text>
       </g>
+
       <!-- Shikoku -->
       <g class="region-group" data-region="shikoku" onclick="App.showRegion('shikoku')">
-        <ellipse cx="145" cy="340" rx="30" ry="18" class="region-shape" id="shape-shikoku"/>
-        <text x="145" y="336" class="region-label">四国</text>
-        <text x="145" y="352" class="region-temp" id="rtemp-shikoku">17°</text>
+        <polygon points="152,330 178,328 202,330 210,344 202,358 178,362 155,354 142,342 148,334"
+                 class="region-shape" id="shape-shikoku"/>
+        <text x="176" y="344" class="region-label">四国</text>
+        <text x="176" y="361" class="region-temp" id="rtemp-shikoku">17°</text>
       </g>
+
       <!-- Kyushu -->
       <g class="region-group" data-region="kyushu" onclick="App.showRegion('kyushu')">
-        <ellipse cx="100" cy="385" rx="38" ry="38" class="region-shape" id="shape-kyushu"/>
-        <text x="100" y="381" class="region-label">九州</text>
-        <text x="100" y="397" class="region-temp" id="rtemp-kyushu">19°</text>
+        <polygon points="116,314 135,318 148,330 155,346 142,364 124,378 104,378 84,366 80,348 82,328 90,316 106,310"
+                 class="region-shape" id="shape-kyushu"/>
+        <text x="117" y="346" class="region-label">九州</text>
+        <text x="117" y="363" class="region-temp" id="rtemp-kyushu">19°</text>
+        <text x="117" y="375" class="region-city">福岡</text>
       </g>
-      <!-- Okinawa -->
+
+      <!-- Okinawa (with dashed line) -->
       <g class="region-group" data-region="okinawa" onclick="App.showRegion('okinawa')">
-        <ellipse cx="60" cy="480" rx="28" ry="16" class="region-shape" id="shape-okinawa"/>
-        <text x="60" y="476" class="region-label">沖縄</text>
-        <text x="60" y="492" class="region-temp" id="rtemp-okinawa">24°</text>
+        <line x1="82" y1="390" x2="76" y2="508" stroke="rgba(100,160,220,0.55)" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <polygon points="52,512 74,508 90,516 87,531 68,534 51,524"
+                 class="region-shape" id="shape-okinawa"/>
+        <text x="70" y="521" class="region-label" style="font-size:8.5px">沖縄</text>
+        <text x="70" y="534" class="region-temp" id="rtemp-okinawa" style="font-size:10px">24°</text>
+      </g>
+
+      <!-- ======= MOUNTAIN MARKERS ======= -->
+      <!-- 富士山 3776m (Chubu/Kanto border) -->
+      <g class="mountain-group" onclick="App.showMountain('fuji')">
+        <polygon points="272,288 278,300 266,300" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
+        <rect x="279" y="280" width="54" height="25" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="306" y="291" text-anchor="middle" font-size="7.5" fill="#0F172A" font-weight="700">🗻富士山</text>
+        <text x="306" y="301" text-anchor="middle" font-size="7" fill="#475569">3776m</text>
+      </g>
+
+      <!-- 北アルプス 3190m (Chubu) -->
+      <g class="mountain-group" onclick="App.showMountain('alps')">
+        <polygon points="242,262 248,274 236,274" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
+        <rect x="192" y="254" width="48" height="25" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="216" y="265" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">北アルプス</text>
+        <text x="216" y="275" text-anchor="middle" font-size="7" fill="#475569">3190m</text>
+      </g>
+
+      <!-- 白山 2702m (Chubu) -->
+      <g class="mountain-group" onclick="App.showMountain('hakusan')">
+        <polygon points="228,282 233,292 223,292" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
+        <rect x="168" y="276" width="40" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="188" y="286" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">白山</text>
+        <text x="188" y="295" text-anchor="middle" font-size="6.5" fill="#475569">2702m</text>
+      </g>
+
+      <!-- 大雪山 2291m (Hokkaido) -->
+      <g class="mountain-group" onclick="App.showMountain('daisetsu')">
+        <polygon points="324,64 330,76 318,76" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
+        <rect x="332" y="58" width="42" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="353" y="68" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">大雪山</text>
+        <text x="353" y="77" text-anchor="middle" font-size="6.5" fill="#475569">2291m</text>
+      </g>
+
+      <!-- 阿蘇山 1592m (Kyushu, volcano) -->
+      <g class="mountain-group" onclick="App.showMountain('aso')">
+        <polygon points="116,354 122,366 110,366" fill="#FCA5A5" stroke="#EF4444" stroke-width="1.5" class="mtn-tri"/>
+        <rect x="54" y="348" width="42" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#FCA5A5" stroke-width="1"/>
+        <text x="75" y="358" text-anchor="middle" font-size="7" fill="#991B1B" font-weight="700">🌋阿蘇山</text>
+        <text x="75" y="367" text-anchor="middle" font-size="6.5" fill="#475569">1592m</text>
+      </g>
+
+      <!-- ======= MAP DECORATIONS ======= -->
+      <!-- Compass rose -->
+      <g transform="translate(14,14)">
+        <circle cx="11" cy="11" r="11" fill="rgba(255,255,255,0.88)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="11" y="9" text-anchor="middle" font-size="6" fill="#1E293B" font-weight="800">N</text>
+        <text x="11" y="20" text-anchor="middle" font-size="5.5" fill="#94A3B8">S</text>
+        <text x="4"  y="14" text-anchor="middle" font-size="5.5" fill="#94A3B8">W</text>
+        <text x="18" y="14" text-anchor="middle" font-size="5.5" fill="#94A3B8">E</text>
+        <line x1="11" y1="2" x2="11" y2="10" stroke="#1E293B" stroke-width="1.5"/>
+      </g>
+
+      <!-- Legend -->
+      <g transform="translate(14,40)">
+        <rect width="76" height="18" rx="4" fill="rgba(255,255,255,0.88)" stroke="#CBD5E1" stroke-width="1"/>
+        <text x="4" y="12" font-size="7" fill="#374151" font-weight="600">▲ 主要山岳</text>
+        <text x="44" y="12" font-size="7" fill="#EF4444" font-weight="600">🌋火山</text>
       </g>
     </svg>
   </div>
@@ -210,11 +359,10 @@
     <button class="icon-btn" onclick="App.showLogOutfit()">＋</button>
   </div>
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="App.filterWardrobe('all', this)">すべて</button>
-    <button class="filter-btn" onclick="App.filterWardrobe('cold', this)">寒い日</button>
-    <button class="filter-btn" onclick="App.filterWardrobe('cool', this)">涼しい日</button>
-    <button class="filter-btn" onclick="App.filterWardrobe('warm', this)">暖かい日</button>
-    <button class="filter-btn" onclick="App.filterWardrobe('hot', this)">暑い日</button>
+    <button class="filter-btn active" onclick="App.filterWardrobe('cold', this)">🧊 寒い日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('cool', this)">🍃 涼しい日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('warm', this)">🌸 暖かい日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('hot', this)">☀️ 暑い日</button>
   </div>
   <div class="wardrobe-grid" id="wardrobe-grid">
     <!-- Populated by JS -->
@@ -235,6 +383,30 @@
     <button class="group-tab" onclick="App.switchGroup('friends', this)">ともだち</button>
     <button class="group-tab" onclick="App.switchGroup('national', this)">全国</button>
   </div>
+
+  <!-- Friend code section (friends tab only) -->
+  <div id="friend-code-section" class="friend-code-section" style="display:none">
+    <div class="code-box">
+      <div class="code-box-half">
+        <div class="code-box-label">📨 コードで参加</div>
+        <div class="code-input-row">
+          <input type="text" id="join-code-input" class="code-input" placeholder="XXXXXX" maxlength="6">
+          <button class="btn-code-join" onclick="App.joinGroup()">参加</button>
+        </div>
+      </div>
+      <div class="code-box-divider"></div>
+      <div class="code-box-half">
+        <div class="code-box-label">🔑 マイコード</div>
+        <div class="code-display-row">
+          <span class="code-display" id="my-invite-code">------</span>
+          <button class="btn-code-gen" onclick="App.generateGroupCode()">発行</button>
+        </div>
+      </div>
+    </div>
+    <div id="my-groups-list" class="my-groups-list"></div>
+    <p class="code-hint">コードを友達に教えてグループでコーデを共有しよう！</p>
+  </div>
+
   <div id="group-feed" class="group-feed">
     <!-- Populated by JS -->
   </div>
