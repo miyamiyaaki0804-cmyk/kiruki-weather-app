@@ -611,9 +611,39 @@ const App = {
     }).join('');
   },
 
+  _tapFeedback(regionKey) {
+    // バウンスアニメーション
+    const grp = document.querySelector(`.region-group[data-region="${regionKey}"]`);
+    if (grp) {
+      grp.classList.add('tapped', 'tapped-anim');
+      setTimeout(() => grp.classList.remove('tapped-anim'), 350);
+
+      // リップルエフェクト (SVG circle 追加)
+      const shape = document.getElementById(`shape-${regionKey}`);
+      if (shape) {
+        const svg  = document.getElementById('japan-map');
+        const bbox = shape.getBBox();
+        const cx   = bbox.x + bbox.width  / 2;
+        const cy   = bbox.y + bbox.height / 2;
+        const ripple = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        ripple.setAttribute('cx', cx);
+        ripple.setAttribute('cy', cy);
+        ripple.setAttribute('r', '0');
+        ripple.classList.add('tap-ripple');
+        svg.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      }
+    }
+
+    // ヒント非表示 (一度タップしたら)
+    const hint = document.getElementById('map-tap-hint');
+    if (hint) hint.classList.add('hidden');
+  },
+
   showRegion(key) {
     const w = JAPAN_WEATHER[key];
     if (!w) return;
+    this._tapFeedback(key);
 
     document.getElementById('modal-region-title').textContent = `${w.name} - ${w.city}`;
 
@@ -986,6 +1016,16 @@ const App = {
   showMountain(key) {
     const m = MOUNTAINS[key];
     if (!m) return;
+
+    // タップフィードバック (山グループ)
+    const grpEl = document.querySelector(`.mountain-group[onclick*="${key}"]`);
+    if (grpEl) {
+      grpEl.classList.add('tapped-anim');
+      setTimeout(() => grpEl.classList.remove('tapped-anim'), 350);
+    }
+    const hint = document.getElementById('map-tap-hint');
+    if (hint) hint.classList.add('hidden');
+
     const region = JAPAN_WEATHER[m.region];
     const summitTemp = region ? Math.round(region.temp - (m.elevation * 0.0065)) : '?';
     const cold = typeof summitTemp === 'number' && summitTemp < 0;
