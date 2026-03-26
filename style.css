@@ -330,40 +330,157 @@ html, body {
     #059669 50%, #D97706 66%, #DC2626 83%, #7F1D1D 100%);
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
+/* ===== MAP REDESIGN ===== */
+.map-view-toggle {
+  display: flex;
+  margin: 8px 16px 4px;
+  background: rgba(15,23,42,0.10);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1.5px solid var(--border);
+}
+.map-vtoggle {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-sub);
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+.map-vtoggle.active {
+  background: var(--primary-dark);
+  color: white;
+  box-shadow: 0 2px 8px rgba(30,58,138,0.30);
+}
 .japan-map-container {
   display: flex;
   justify-content: center;
-  padding: 8px 16px;
-  max-height: calc(100vh - 220px);
+  padding: 4px 12px;
+  max-height: calc(100vh - 240px);
 }
 #japan-map {
   width: 100%;
-  max-width: 340px;
+  max-width: 360px;
   height: auto;
+  border-radius: 16px;
+  overflow: hidden;
 }
 .region-group { cursor: pointer; }
 .region-shape {
-  stroke: white;
-  stroke-width: 2;
-  transition: filter 0.15s;
+  stroke: rgba(255,255,255,0.55);
+  stroke-width: 1.5;
+  transition: filter 0.15s, opacity 0.15s;
 }
-.region-group:active .region-shape { filter: brightness(1.15); }
+.region-group:hover .region-shape { filter: brightness(1.18); }
+.region-group:active .region-shape { opacity: 0.8; }
 .region-label {
-  text-anchor: middle;
-  font-size: 11px;
-  font-weight: 700;
-  fill: white;
+  font-size: 8.5px;
+  font-weight: 800;
+  fill: rgba(255,255,255,0.92);
   pointer-events: none;
+  letter-spacing: 0.3px;
 }
 .region-temp {
-  text-anchor: middle;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
   fill: white;
   pointer-events: none;
 }
-.map-hint { text-align: center; color: var(--text-sub); font-size: 0.75rem; padding-bottom: 8px; }
-.map-date { font-size: 0.78rem; color: var(--text-sub); }
+.mountain-group { cursor: pointer; }
+.mountain-group:active rect { opacity: 0.7; }
+.legend-label { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+.map-hint {
+  text-align: center;
+  color: var(--text-sub);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 0 8px;
+}
+
+/* ===== RANK VIEW ===== */
+.rank-list {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-y: auto;
+  max-height: calc(100vh - 260px);
+}
+.rank-item {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.rank-item:active { transform: scale(0.98); }
+.rank-num {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--text-sub);
+  min-width: 18px;
+  text-align: center;
+}
+.rank-num.rank-1 { color: #D97706; font-size: 0.9rem; }
+.rank-num.rank-2 { color: #6B7280; }
+.rank-num.rank-3 { color: #92400E; }
+.rank-region-name { font-size: 0.88rem; font-weight: 800; min-width: 42px; }
+.rank-city { font-size: 0.7rem; color: var(--text-sub); font-weight: 600; min-width: 52px; }
+.rank-bar-wrap { flex: 1; }
+.rank-bar {
+  height: 8px;
+  border-radius: 4px;
+  min-width: 8px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.rank-temp-val { font-size: 0.95rem; font-weight: 900; min-width: 38px; text-align: right; }
+.rank-range { font-size: 0.68rem; color: var(--text-sub); font-weight: 600; white-space: nowrap; }
+
+/* ===== OCCASION TAGS ===== */
+.occasion-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 4px;
+}
+.occasion-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 11px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-sub);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.occasion-btn.selected {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+  box-shadow: 0 2px 8px rgba(30,58,138,0.25);
+}
+.occasion-tag-display {
+  display: inline-flex;
+  align-items: center;
+  background: #EFF6FF;
+  color: #1E3A8A;
+  border-radius: 12px;
+  padding: 2px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 2px 2px 0;
+}
 
 /* ===== WARDROBE ===== */
 .filter-bar {
@@ -430,6 +547,7 @@ html, body {
 .wardrobe-info { padding: 8px 10px; }
 .wardrobe-date { font-size: 0.72rem; color: var(--text-sub); font-weight: 600; }
 .wardrobe-temp { font-size: 0.88rem; font-weight: 800; color: var(--primary-dark); }
+.wardrobe-occasions { display: flex; flex-wrap: wrap; margin-top: 4px; }
 .wardrobe-feeling {
   font-size: 0.75rem;
   margin-top: 3px;
@@ -972,7 +1090,8 @@ html, body {
   fill: rgba(255,255,255,0.75);
   pointer-events: none;
 }
-.japan-map-container { max-height: calc(100vh - 200px); }
+.japan-map-container { max-height: calc(100vh - 260px); }
+.rank-list { max-height: calc(100vh - 270px); }
 
 /* ===== MOUNTAIN MARKERS ===== */
 .mountain-group { cursor: pointer; }

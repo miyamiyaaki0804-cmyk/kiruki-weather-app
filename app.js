@@ -2,6 +2,22 @@
    KiruKi - 着る気象アプリ  app.js
    ==================================================== */
 
+// ===== OCCASION TAGS =====
+const OCCASION_TAGS = [
+  { id: 'univ',     emoji: '🎓', label: '大学・授業' },
+  { id: 'work',     emoji: '💼', label: 'バイト・仕事' },
+  { id: 'date',     emoji: '💕', label: 'デート' },
+  { id: 'sports',   emoji: '⚽', label: 'スポーツ' },
+  { id: 'party',    emoji: '🎉', label: '飲み会' },
+  { id: 'shopping', emoji: '🛍️', label: 'ショッピング' },
+  { id: 'home',     emoji: '🏠', label: 'おうち' },
+  { id: 'travel',   emoji: '✈️', label: '旅行' },
+  { id: 'outing',   emoji: '🎨', label: 'おでかけ' },
+  { id: 'formal',   emoji: '👔', label: 'フォーマル' },
+  { id: 'friends',  emoji: '🎮', label: '友達と遊ぶ' },
+  { id: 'gym',      emoji: '🏋️', label: 'ジム' },
+];
+
 // ===== MOCK DATA =====
 
 const JAPAN_WEATHER = {
@@ -543,9 +559,56 @@ const App = {
     Object.entries(JAPAN_WEATHER).forEach(([key, w]) => {
       const shape = document.getElementById(`shape-${key}`);
       const tempEl = document.getElementById(`rtemp-${key}`);
+      const iconEl = document.getElementById(`icon-${key}`);
       if (shape) shape.setAttribute('fill', tempColor(w.temp));
       if (tempEl) tempEl.textContent = `${w.temp}°`;
+      if (iconEl) iconEl.textContent = w.icon;
     });
+  },
+
+  switchMapView(mode) {
+    const mapPanel  = document.getElementById('map-svg-panel');
+    const rankPanel = document.getElementById('map-rank-panel');
+    document.querySelectorAll('.map-vtoggle').forEach(b => b.classList.remove('active'));
+    if (mode === 'map') {
+      mapPanel.style.display  = '';
+      rankPanel.style.display = 'none';
+      document.getElementById('vtoggle-map').classList.add('active');
+    } else {
+      mapPanel.style.display  = 'none';
+      rankPanel.style.display = '';
+      document.getElementById('vtoggle-rank').classList.add('active');
+      this.renderRankView();
+    }
+  },
+
+  renderRankView() {
+    const sorted = Object.entries(JAPAN_WEATHER)
+      .sort((a, b) => b[1].temp - a[1].temp);
+    const maxTemp = sorted[0][1].temp;
+    const minTemp = sorted[sorted.length - 1][1].temp;
+    const range   = maxTemp - minTemp || 1;
+
+    const medalMap = ['🥇','🥈','🥉'];
+    const list = document.getElementById('rank-list');
+    list.innerHTML = sorted.map(([key, w], i) => {
+      const pct   = Math.round(((w.temp - minTemp) / range) * 100);
+      const color = tempColor(w.temp);
+      const rankClass = i < 3 ? ` rank-${i+1}` : '';
+      const numLabel  = i < 3 ? medalMap[i] : `${i+1}`;
+      return `
+        <div class="rank-item" onclick="App.showRegion('${key}')">
+          <span class="rank-num${rankClass}">${numLabel}</span>
+          <span style="font-size:1.4rem">${w.icon}</span>
+          <span class="rank-region-name">${w.name}</span>
+          <span class="rank-city">${w.city}</span>
+          <div class="rank-bar-wrap">
+            <div class="rank-bar" style="width:${Math.max(pct,6)}%;background:${color}"></div>
+          </div>
+          <span class="rank-temp-val" style="color:${color}">${w.temp}°</span>
+          <span class="rank-range">▲${w.high}°▼${w.low}°</span>
+        </div>`;
+    }).join('');
   },
 
   showRegion(key) {
@@ -641,12 +704,19 @@ const App = {
           ? `<img src="${item.photo}" class="wardrobe-photo" alt="コーデ写真">`
           : `<div class="wardrobe-photo-placeholder">${item.emoji || '👕'}</div>`;
 
+        const occasionHtml = (item.occasions || []).length > 0
+          ? `<div class="wardrobe-occasions">${(item.occasions || []).map(id => {
+              const t = OCCASION_TAGS.find(x => x.id === id);
+              return t ? `<span class="occasion-tag-display">${t.emoji}${t.label}</span>` : '';
+            }).join('')}</div>` : '';
+
         card.innerHTML = `
           ${photoContent}
           <div class="wardrobe-info">
             <div class="wardrobe-date">${item.date}</div>
             <div class="wardrobe-temp">${item.icon} ${item.temp}°C</div>
             <div class="wardrobe-feeling">${FEELING_LABELS[item.feeling] || ''}</div>
+            ${occasionHtml}
           </div>
         `;
         grid.appendChild(card);
@@ -691,6 +761,12 @@ const App = {
           <div class="idi-val">${FEELING_LABELS[item.feeling] || '-'}</div>
         </div>
       </div>
+      ${(item.occasions||[]).length > 0 ? `
+        <div style="font-weight:700;margin-bottom:6px">🏷️ シーン</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px">${(item.occasions||[]).map(id => {
+          const t = OCCASION_TAGS.find(x => x.id === id);
+          return t ? `<span class="occasion-tag-display" style="font-size:0.8rem;padding:4px 10px">${t.emoji} ${t.label}</span>` : '';
+        }).join('')}</div>` : ''}
       <div style="font-weight:700;margin-bottom:6px">👗 服装</div>
       <div class="item-comment" style="margin-bottom:10px">${item.outfit}</div>
       ${item.comment ? `<div style="font-weight:700;margin-bottom:6px">📝 メモ</div><div class="item-comment">${item.comment}</div>` : ''}
@@ -712,8 +788,9 @@ const App = {
 
   // ===== LOG OUTFIT =====
   showLogOutfit() {
-    State.selectedFeeling = null;
-    State.photoDataUrl = null;
+    State.selectedFeeling   = null;
+    State.photoDataUrl      = null;
+    State.selectedOccasions = [];
 
     document.getElementById('photo-preview').style.display = 'block';
     document.getElementById('photo-preview-img').style.display = 'none';
@@ -722,6 +799,15 @@ const App = {
     document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('log-share-friends').checked = true;
     document.getElementById('log-share-national').checked = false;
+
+    // Populate occasion tags
+    const tagsEl = document.getElementById('occasion-tags');
+    if (tagsEl) {
+      tagsEl.innerHTML = OCCASION_TAGS.map(t =>
+        `<button class="occasion-btn" data-id="${t.id}"
+          onclick="App.toggleOccasion(this,'${t.id}')">${t.emoji} ${t.label}</button>`
+      ).join('');
+    }
 
     const w = JAPAN_WEATHER.kanto;
     const now = new Date();
@@ -753,6 +839,15 @@ const App = {
     State.selectedFeeling = feeling;
   },
 
+  toggleOccasion(btn, id) {
+    btn.classList.toggle('selected');
+    if (btn.classList.contains('selected')) {
+      if (!State.selectedOccasions.includes(id)) State.selectedOccasions.push(id);
+    } else {
+      State.selectedOccasions = State.selectedOccasions.filter(o => o !== id);
+    }
+  },
+
   saveOutfit() {
     const outfitText = document.getElementById('log-outfit-text').value.trim();
     if (!outfitText) {
@@ -776,7 +871,8 @@ const App = {
       photo: State.photoDataUrl,
       emoji: emojis[Math.floor(Math.random() * emojis.length)],
       sharedFriends: document.getElementById('log-share-friends').checked,
-      sharedNational: document.getElementById('log-share-national').checked
+      sharedNational: document.getElementById('log-share-national').checked,
+      occasions: [...(State.selectedOccasions || [])]
     };
 
     State.wardrobe.unshift(newItem);
@@ -843,6 +939,10 @@ const App = {
         ${item.comment ? `<div class="feed-comment">${item.comment}</div>` : ''}
         <span class="feed-weather-chip">${item.icon} ${item.temp}°C ${item.condition}</span>
         <span class="feed-feeling-chip ${FEELING_CHIP_CLASS[item.feeling] || ''}">${FEELING_LABELS[item.feeling] || ''}</span>
+        ${(item.occasions||[]).map(id => {
+          const t = OCCASION_TAGS.find(x => x.id === id);
+          return t ? `<span class="occasion-tag-display">${t.emoji} ${t.label}</span>` : '';
+        }).join('')}
       </div>
     `;
     return card;

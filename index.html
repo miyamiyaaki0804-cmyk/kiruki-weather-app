@@ -196,160 +196,199 @@
 <div id="view-map" class="view">
   <div class="view-header">
     <h2>🗾 全国気温マップ</h2>
-    <div class="map-date" id="map-date"></div>
+    <div id="map-date" class="header-date"></div>
   </div>
+
+  <div class="map-view-toggle">
+    <button class="map-vtoggle active" id="vtoggle-map" onclick="App.switchMapView('map',this)">🗾 地図</button>
+    <button class="map-vtoggle" id="vtoggle-rank" onclick="App.switchMapView('rank',this)">📊 一覧</button>
+  </div>
+
   <div class="temp-legend">
-    <span class="legend-cold">寒</span>
+    <span class="legend-label">🥶 極寒</span>
     <div class="legend-bar"></div>
-    <span class="legend-hot">暑</span>
+    <span class="legend-label">🥵 猛暑</span>
   </div>
-  <div class="japan-map-container">
-    <svg id="japan-map" viewBox="0 0 380 590" xmlns="http://www.w3.org/2000/svg">
-      <!-- Sea background -->
-      <rect width="380" height="590" fill="#C8E6F5"/>
-      <text x="28" y="220" font-size="9" fill="rgba(79,142,247,0.28)" transform="rotate(-75 28 220)">日本海</text>
-      <text x="310" y="430" font-size="9" fill="rgba(79,142,247,0.28)">太平洋</text>
 
-      <!-- Hokkaido -->
-      <g class="region-group" data-region="hokkaido" onclick="App.showRegion('hokkaido')">
-        <polygon points="295,120 285,96 290,68 308,42 316,16 332,20 356,44 374,72 370,96 342,114 318,122"
-                 class="region-shape" id="shape-hokkaido"/>
-        <text x="330" y="74" class="region-label">北海道</text>
-        <text x="330" y="91" class="region-temp" id="rtemp-hokkaido">3°</text>
-        <text x="310" y="80" class="region-city">札幌</text>
-      </g>
+  <!-- ===== SVG MAP PANEL ===== -->
+  <div id="map-svg-panel">
+    <div class="japan-map-container">
+      <svg id="japan-map" viewBox="0 0 440 600" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sea-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#071428"/>
+            <stop offset="50%" stop-color="#0B2550"/>
+            <stop offset="100%" stop-color="#081E3E"/>
+          </linearGradient>
+          <filter id="rshadow" x="-15%" y="-15%" width="130%" height="130%">
+            <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.45)"/>
+          </filter>
+        </defs>
 
-      <!-- Tohoku -->
-      <g class="region-group" data-region="tohoku" onclick="App.showRegion('tohoku')">
-        <polygon points="280,128 295,120 318,122 316,160 312,240 280,242 274,200 274,160"
-                 class="region-shape" id="shape-tohoku"/>
-        <text x="297" y="182" class="region-label">東北</text>
-        <text x="297" y="199" class="region-temp" id="rtemp-tohoku">8°</text>
-        <text x="297" y="213" class="region-city">仙台</text>
-      </g>
+        <!-- Deep ocean -->
+        <rect width="440" height="600" fill="url(#sea-grad)"/>
+        <!-- Ocean grid lines (decorative) -->
+        <g stroke="rgba(147,197,253,0.06)" stroke-width="1" fill="none">
+          <line x1="0" y1="100" x2="440" y2="100"/>
+          <line x1="0" y1="200" x2="440" y2="200"/>
+          <line x1="0" y1="300" x2="440" y2="300"/>
+          <line x1="0" y1="400" x2="440" y2="400"/>
+          <line x1="0" y1="500" x2="440" y2="500"/>
+          <line x1="100" y1="0" x2="100" y2="600"/>
+          <line x1="200" y1="0" x2="200" y2="600"/>
+          <line x1="300" y1="0" x2="300" y2="600"/>
+          <line x1="400" y1="0" x2="400" y2="600"/>
+        </g>
+        <!-- Ocean labels -->
+        <text x="30" y="230" font-size="9" fill="rgba(147,197,253,0.30)" transform="rotate(-80 30 230)" font-weight="600" letter-spacing="2">日 本 海</text>
+        <text x="365" y="455" font-size="9" fill="rgba(147,197,253,0.30)" font-weight="600" letter-spacing="2">太 平 洋</text>
+        <text x="34" y="395" font-size="8" fill="rgba(147,197,253,0.22)" font-weight="500">東シナ海</text>
 
-      <!-- Kanto -->
-      <g class="region-group" data-region="kanto" onclick="App.showRegion('kanto')">
-        <polygon points="280,242 312,240 312,262 305,280 300,302 284,318 268,308 264,292 265,268"
-                 class="region-shape" id="shape-kanto"/>
-        <text x="290" y="272" class="region-label">関東</text>
-        <text x="290" y="289" class="region-temp" id="rtemp-kanto">18°</text>
-        <text x="290" y="303" class="region-city">東京</text>
-      </g>
+        <!-- ====== HOKKAIDO ====== -->
+        <g class="region-group" data-region="hokkaido" onclick="App.showRegion('hokkaido')" filter="url(#rshadow)">
+          <polygon points="296,118 283,94 285,65 300,40 316,16 334,18 355,36 376,62 380,92 364,114 337,122 315,124"
+                   class="region-shape" id="shape-hokkaido"/>
+          <text x="332" y="68" text-anchor="middle" font-size="18" id="icon-hokkaido">🌨️</text>
+          <text x="332" y="88" text-anchor="middle" class="region-temp" id="rtemp-hokkaido">3°</text>
+          <text x="332" y="104" text-anchor="middle" class="region-label">北海道</text>
+        </g>
 
-      <!-- Chubu -->
-      <g class="region-group" data-region="chubu" onclick="App.showRegion('chubu')">
-        <polygon points="265,268 264,292 248,314 236,298 226,272 232,250 244,240 258,244"
-                 class="region-shape" id="shape-chubu"/>
-        <text x="248" y="272" class="region-label">中部</text>
-        <text x="248" y="289" class="region-temp" id="rtemp-chubu">14°</text>
-        <text x="248" y="303" class="region-city">名古屋</text>
-      </g>
+        <!-- ====== TOHOKU ====== -->
+        <g class="region-group" data-region="tohoku" onclick="App.showRegion('tohoku')" filter="url(#rshadow)">
+          <polygon points="280,124 296,118 315,124 318,158 313,202 307,244 282,246 273,200 272,160"
+                   class="region-shape" id="shape-tohoku"/>
+          <text x="295" y="172" text-anchor="middle" font-size="15" id="icon-tohoku">☁️</text>
+          <text x="295" y="190" text-anchor="middle" class="region-temp" id="rtemp-tohoku">8°</text>
+          <text x="295" y="204" text-anchor="middle" class="region-label">東北</text>
+        </g>
 
-      <!-- Kinki -->
-      <g class="region-group" data-region="kinki" onclick="App.showRegion('kinki')">
-        <polygon points="236,298 248,314 244,334 226,342 205,332 192,316 194,298 207,291 220,290"
-                 class="region-shape" id="shape-kinki"/>
-        <text x="220" y="312" class="region-label">近畿</text>
-        <text x="220" y="329" class="region-temp" id="rtemp-kinki">16°</text>
-        <text x="220" y="341" class="region-city">大阪</text>
-      </g>
+        <!-- ====== KANTO ====== -->
+        <g class="region-group" data-region="kanto" onclick="App.showRegion('kanto')" filter="url(#rshadow)">
+          <polygon points="282,246 307,244 316,264 312,283 304,305 288,320 270,311 264,293 266,268"
+                   class="region-shape" id="shape-kanto"/>
+          <text x="291" y="271" text-anchor="middle" font-size="15" id="icon-kanto">⛅</text>
+          <text x="291" y="289" text-anchor="middle" class="region-temp" id="rtemp-kanto">18°</text>
+          <text x="291" y="303" text-anchor="middle" class="region-label">関東</text>
+        </g>
 
-      <!-- Chugoku -->
-      <g class="region-group" data-region="chugoku" onclick="App.showRegion('chugoku')">
-        <polygon points="192,316 205,332 190,328 165,325 135,318 116,314 118,302 130,292 152,290 175,294"
-                 class="region-shape" id="shape-chugoku"/>
-        <text x="154" y="308" class="region-label">中国</text>
-        <text x="154" y="325" class="region-temp" id="rtemp-chugoku">14°</text>
-      </g>
+        <!-- ====== CHUBU ====== -->
+        <g class="region-group" data-region="chubu" onclick="App.showRegion('chubu')" filter="url(#rshadow)">
+          <polygon points="266,268 264,293 248,318 234,302 225,276 230,252 244,242 260,246"
+                   class="region-shape" id="shape-chubu"/>
+          <text x="247" y="270" text-anchor="middle" font-size="13" id="icon-chubu">☀️</text>
+          <text x="247" y="285" text-anchor="middle" class="region-temp" id="rtemp-chubu">14°</text>
+          <text x="247" y="299" text-anchor="middle" class="region-label">中部</text>
+        </g>
 
-      <!-- Shikoku -->
-      <g class="region-group" data-region="shikoku" onclick="App.showRegion('shikoku')">
-        <polygon points="152,330 178,328 202,330 210,344 202,358 178,362 155,354 142,342 148,334"
-                 class="region-shape" id="shape-shikoku"/>
-        <text x="176" y="344" class="region-label">四国</text>
-        <text x="176" y="361" class="region-temp" id="rtemp-shikoku">17°</text>
-      </g>
+        <!-- ====== KINKI ====== -->
+        <g class="region-group" data-region="kinki" onclick="App.showRegion('kinki')" filter="url(#rshadow)">
+          <polygon points="234,302 248,318 244,338 226,346 204,336 192,320 194,302 208,293 223,293"
+                   class="region-shape" id="shape-kinki"/>
+          <text x="220" y="312" text-anchor="middle" font-size="13" id="icon-kinki">⛅</text>
+          <text x="220" y="327" text-anchor="middle" class="region-temp" id="rtemp-kinki">16°</text>
+          <text x="220" y="341" text-anchor="middle" class="region-label">近畿</text>
+        </g>
 
-      <!-- Kyushu -->
-      <g class="region-group" data-region="kyushu" onclick="App.showRegion('kyushu')">
-        <polygon points="116,314 135,318 148,330 155,346 142,364 124,378 104,378 84,366 80,348 82,328 90,316 106,310"
-                 class="region-shape" id="shape-kyushu"/>
-        <text x="117" y="346" class="region-label">九州</text>
-        <text x="117" y="363" class="region-temp" id="rtemp-kyushu">19°</text>
-        <text x="117" y="375" class="region-city">福岡</text>
-      </g>
+        <!-- ====== CHUGOKU ====== -->
+        <g class="region-group" data-region="chugoku" onclick="App.showRegion('chugoku')" filter="url(#rshadow)">
+          <polygon points="192,320 204,336 190,332 164,327 135,319 115,315 118,303 131,293 153,291 176,295"
+                   class="region-shape" id="shape-chugoku"/>
+          <text x="154" y="307" text-anchor="middle" font-size="11" id="icon-chugoku">☁️</text>
+          <text x="154" y="320" text-anchor="middle" class="region-temp" id="rtemp-chugoku">14°</text>
+          <text x="154" y="332" text-anchor="middle" class="region-label">中国</text>
+        </g>
 
-      <!-- Okinawa (with dashed line) -->
-      <g class="region-group" data-region="okinawa" onclick="App.showRegion('okinawa')">
-        <line x1="82" y1="390" x2="76" y2="508" stroke="rgba(100,160,220,0.55)" stroke-width="1.5" stroke-dasharray="5,4"/>
-        <polygon points="52,512 74,508 90,516 87,531 68,534 51,524"
-                 class="region-shape" id="shape-okinawa"/>
-        <text x="70" y="521" class="region-label" style="font-size:8.5px">沖縄</text>
-        <text x="70" y="534" class="region-temp" id="rtemp-okinawa" style="font-size:10px">24°</text>
-      </g>
+        <!-- ====== SHIKOKU ====== -->
+        <g class="region-group" data-region="shikoku" onclick="App.showRegion('shikoku')" filter="url(#rshadow)">
+          <polygon points="152,334 180,331 206,334 214,348 205,362 180,366 155,358 142,346 148,337"
+                   class="region-shape" id="shape-shikoku"/>
+          <text x="178" y="343" text-anchor="middle" font-size="11" id="icon-shikoku">🌤️</text>
+          <text x="178" y="356" text-anchor="middle" class="region-temp" id="rtemp-shikoku">17°</text>
+          <text x="178" y="367" text-anchor="middle" class="region-label">四国</text>
+        </g>
 
-      <!-- ======= MOUNTAIN MARKERS ======= -->
-      <!-- 富士山 3776m (Chubu/Kanto border) -->
-      <g class="mountain-group" onclick="App.showMountain('fuji')">
-        <polygon points="272,288 278,300 266,300" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
-        <rect x="279" y="280" width="54" height="25" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="306" y="291" text-anchor="middle" font-size="7.5" fill="#0F172A" font-weight="700">🗻富士山</text>
-        <text x="306" y="301" text-anchor="middle" font-size="7" fill="#475569">3776m</text>
-      </g>
+        <!-- ====== KYUSHU ====== -->
+        <g class="region-group" data-region="kyushu" onclick="App.showRegion('kyushu')" filter="url(#rshadow)">
+          <polygon points="115,315 135,319 151,333 157,350 143,368 125,382 105,382 83,370 79,350 81,329 92,317 107,311"
+                   class="region-shape" id="shape-kyushu"/>
+          <text x="118" y="340" text-anchor="middle" font-size="14" id="icon-kyushu">☁️</text>
+          <text x="118" y="357" text-anchor="middle" class="region-temp" id="rtemp-kyushu">19°</text>
+          <text x="118" y="370" text-anchor="middle" class="region-label">九州</text>
+        </g>
 
-      <!-- 北アルプス 3190m (Chubu) -->
-      <g class="mountain-group" onclick="App.showMountain('alps')">
-        <polygon points="242,262 248,274 236,274" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
-        <rect x="192" y="254" width="48" height="25" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="216" y="265" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">北アルプス</text>
-        <text x="216" y="275" text-anchor="middle" font-size="7" fill="#475569">3190m</text>
-      </g>
+        <!-- ====== OKINAWA ====== -->
+        <g class="region-group" data-region="okinawa" onclick="App.showRegion('okinawa')">
+          <line x1="81" y1="390" x2="73" y2="508" stroke="rgba(147,197,253,0.35)" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <polygon points="50,510 75,506 91,514 88,529 68,532 49,522"
+                   class="region-shape" id="shape-okinawa"/>
+          <text x="70" y="516" text-anchor="middle" font-size="11" id="icon-okinawa">🌤️</text>
+          <text x="70" y="527" text-anchor="middle" class="region-temp" id="rtemp-okinawa" style="font-size:9px">24°</text>
+          <text x="70" y="538" text-anchor="middle" class="region-label" style="font-size:7.5px">沖縄</text>
+        </g>
 
-      <!-- 白山 2702m (Chubu) -->
-      <g class="mountain-group" onclick="App.showMountain('hakusan')">
-        <polygon points="228,282 233,292 223,292" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
-        <rect x="168" y="276" width="40" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="188" y="286" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">白山</text>
-        <text x="188" y="295" text-anchor="middle" font-size="6.5" fill="#475569">2702m</text>
-      </g>
+        <!-- ====== MOUNTAINS ====== -->
+        <!-- 富士山 3776m -->
+        <g class="mountain-group" onclick="App.showMountain('fuji')">
+          <polygon points="272,292 279,305 265,305" fill="white" stroke="#94A3B8" stroke-width="1.5"/>
+          <rect x="280" y="284" width="60" height="28" rx="6" fill="rgba(7,20,40,0.88)" stroke="#475569" stroke-width="1.2"/>
+          <text x="310" y="295" text-anchor="middle" font-size="7.5" fill="white" font-weight="800">🗻 富士山</text>
+          <text x="310" y="306" text-anchor="middle" font-size="7" fill="#7DD3FC">3776m 頂上-10°</text>
+        </g>
 
-      <!-- 大雪山 2291m (Hokkaido) -->
-      <g class="mountain-group" onclick="App.showMountain('daisetsu')">
-        <polygon points="324,64 330,76 318,76" fill="white" stroke="#64748B" stroke-width="1.5" class="mtn-tri"/>
-        <rect x="332" y="58" width="42" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="353" y="68" text-anchor="middle" font-size="7" fill="#0F172A" font-weight="700">大雪山</text>
-        <text x="353" y="77" text-anchor="middle" font-size="6.5" fill="#475569">2291m</text>
-      </g>
+        <!-- 北アルプス 3190m -->
+        <g class="mountain-group" onclick="App.showMountain('alps')">
+          <polygon points="241,264 247,277 235,277" fill="white" stroke="#94A3B8" stroke-width="1.5"/>
+          <rect x="188" y="256" width="50" height="28" rx="6" fill="rgba(7,20,40,0.88)" stroke="#475569" stroke-width="1.2"/>
+          <text x="213" y="267" text-anchor="middle" font-size="6.5" fill="white" font-weight="800">北アルプス</text>
+          <text x="213" y="278" text-anchor="middle" font-size="7" fill="#7DD3FC">3190m 頂上-7°</text>
+        </g>
 
-      <!-- 阿蘇山 1592m (Kyushu, volcano) -->
-      <g class="mountain-group" onclick="App.showMountain('aso')">
-        <polygon points="116,354 122,366 110,366" fill="#FCA5A5" stroke="#EF4444" stroke-width="1.5" class="mtn-tri"/>
-        <rect x="54" y="348" width="42" height="22" rx="4" fill="rgba(255,255,255,0.93)" stroke="#FCA5A5" stroke-width="1"/>
-        <text x="75" y="358" text-anchor="middle" font-size="7" fill="#991B1B" font-weight="700">🌋阿蘇山</text>
-        <text x="75" y="367" text-anchor="middle" font-size="6.5" fill="#475569">1592m</text>
-      </g>
+        <!-- 白山 2702m -->
+        <g class="mountain-group" onclick="App.showMountain('hakusan')">
+          <polygon points="228,284 234,295 222,295" fill="white" stroke="#94A3B8" stroke-width="1.5"/>
+          <rect x="168" y="278" width="46" height="24" rx="6" fill="rgba(7,20,40,0.88)" stroke="#475569" stroke-width="1.2"/>
+          <text x="191" y="288" text-anchor="middle" font-size="7" fill="white" font-weight="800">白山</text>
+          <text x="191" y="297" text-anchor="middle" font-size="6.5" fill="#7DD3FC">2702m</text>
+        </g>
 
-      <!-- ======= MAP DECORATIONS ======= -->
-      <!-- Compass rose -->
-      <g transform="translate(14,14)">
-        <circle cx="11" cy="11" r="11" fill="rgba(255,255,255,0.88)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="11" y="9" text-anchor="middle" font-size="6" fill="#1E293B" font-weight="800">N</text>
-        <text x="11" y="20" text-anchor="middle" font-size="5.5" fill="#94A3B8">S</text>
-        <text x="4"  y="14" text-anchor="middle" font-size="5.5" fill="#94A3B8">W</text>
-        <text x="18" y="14" text-anchor="middle" font-size="5.5" fill="#94A3B8">E</text>
-        <line x1="11" y1="2" x2="11" y2="10" stroke="#1E293B" stroke-width="1.5"/>
-      </g>
+        <!-- 大雪山 2291m -->
+        <g class="mountain-group" onclick="App.showMountain('daisetsu')">
+          <polygon points="324,66 331,79 317,79" fill="white" stroke="#94A3B8" stroke-width="1.5"/>
+          <rect x="333" y="59" width="46" height="24" rx="6" fill="rgba(7,20,40,0.88)" stroke="#475569" stroke-width="1.2"/>
+          <text x="356" y="69" text-anchor="middle" font-size="7" fill="white" font-weight="800">大雪山</text>
+          <text x="356" y="78" text-anchor="middle" font-size="6.5" fill="#7DD3FC">2291m</text>
+        </g>
 
-      <!-- Legend -->
-      <g transform="translate(14,40)">
-        <rect width="76" height="18" rx="4" fill="rgba(255,255,255,0.88)" stroke="#CBD5E1" stroke-width="1"/>
-        <text x="4" y="12" font-size="7" fill="#374151" font-weight="600">▲ 主要山岳</text>
-        <text x="44" y="12" font-size="7" fill="#EF4444" font-weight="600">🌋火山</text>
-      </g>
-    </svg>
+        <!-- 阿蘇山 1592m (volcano) -->
+        <g class="mountain-group" onclick="App.showMountain('aso')">
+          <polygon points="116,356 123,369 109,369" fill="#FCA5A5" stroke="#EF4444" stroke-width="1.5"/>
+          <rect x="52" y="349" width="48" height="24" rx="6" fill="rgba(7,20,40,0.90)" stroke="#DC2626" stroke-width="1.2"/>
+          <text x="76" y="359" text-anchor="middle" font-size="7" fill="#FCA5A5" font-weight="800">🌋 阿蘇山</text>
+          <text x="76" y="368" text-anchor="middle" font-size="6.5" fill="#94A3B8">1592m 活火山</text>
+        </g>
+
+        <!-- Compass -->
+        <g transform="translate(14,14)">
+          <circle cx="14" cy="14" r="14" fill="rgba(7,20,40,0.82)" stroke="#334155" stroke-width="1.5"/>
+          <polygon points="14,4 17,14 14,12 11,14" fill="white"/>
+          <polygon points="14,24 17,14 14,16 11,14" fill="#475569"/>
+          <text x="14" y="7.5" text-anchor="middle" font-size="5.5" fill="white" font-weight="900">N</text>
+        </g>
+        <!-- Legend -->
+        <g transform="translate(14,44)">
+          <rect width="84" height="20" rx="6" fill="rgba(7,20,40,0.82)" stroke="#334155" stroke-width="1"/>
+          <text x="8" y="14" font-size="7" fill="#CBD5E1" font-weight="700">▲ 主要山岳</text>
+          <text x="54" y="14" font-size="7" fill="#FCA5A5" font-weight="700">🌋火山</text>
+        </g>
+      </svg>
+    </div>
+    <p class="map-hint">地域タップ → 詳細 ｜ ▲タップ → 山岳気温</p>
   </div>
-  <p class="map-hint">地域をタップすると詳細を表示</p>
+
+  <!-- ===== RANK PANEL ===== -->
+  <div id="map-rank-panel" style="display:none">
+    <div id="rank-list" class="rank-list"></div>
+  </div>
 </div>
 
 <!-- ==================== WARDROBE VIEW ==================== -->
@@ -492,6 +531,11 @@
           <button class="feeling-btn" onclick="App.selectFeeling(this, 'warm')">😅 少し暑い</button>
           <button class="feeling-btn" onclick="App.selectFeeling(this, 'too-hot')">🥵 暑すぎ</button>
         </div>
+      </div>
+
+      <div class="log-field">
+        <label>🏷️ シーン・予定タグ <span style="font-weight:400;font-size:0.75rem;color:var(--text-sub)">(複数選択可)</span></label>
+        <div class="occasion-tags" id="occasion-tags"></div>
       </div>
 
       <div class="log-field">
