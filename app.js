@@ -819,9 +819,12 @@ const App = {
 
     Object.entries(JAPAN_WEATHER).forEach(([key, w]) => {
       const shape = document.getElementById(`shape-${key}`);
+      const badge = document.getElementById(`badge-${key}`);
       const tempEl = document.getElementById(`rtemp-${key}`);
       const iconEl = document.getElementById(`icon-${key}`);
-      if (shape) shape.setAttribute('fill', tempColor(w.temp));
+      const color = tempColor(w.temp);
+      if (shape) shape.setAttribute('fill', color);
+      if (badge) badge.setAttribute('fill', color);
       if (tempEl) tempEl.textContent = `${w.temp}°`;
       if (iconEl) iconEl.textContent = w.icon;
     });
@@ -1422,7 +1425,10 @@ const App = {
 window.addEventListener('DOMContentLoaded', () => {
   Object.entries(JAPAN_WEATHER).forEach(([key, w]) => {
     const shape = document.getElementById(`shape-${key}`);
-    if (shape) shape.setAttribute('fill', tempColor(w.temp));
+    const badge = document.getElementById(`badge-${key}`);
+    const color = tempColor(w.temp);
+    if (shape) shape.setAttribute('fill', color);
+    if (badge) badge.setAttribute('fill', color);
   });
   const mapDate = document.getElementById('map-date');
   if (mapDate) mapDate.textContent = '';
