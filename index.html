@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KiruKi - 着る気象</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ==================== INTRO VIEW ==================== -->
+<div id="view-intro" class="view active">
+  <div class="intro-bg">
+    <div class="intro-clouds"></div>
+  </div>
+  <div class="intro-content">
+    <div class="intro-logo">
+      <div class="logo-icon">👕</div>
+      <h1 class="logo-title">KiruKi</h1>
+      <p class="logo-sub">着る気象アプリ</p>
+    </div>
+    <div class="intro-features">
+      <div class="feature-card">
+        <span class="feature-icon">🌡️</span>
+        <div>
+          <h3>AIコーデ提案</h3>
+          <p>今日の気温・天気に合わせて、AIがぴったりの服装をおすすめします。</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📸</span>
+        <div>
+          <h3>コーデ記録</h3>
+          <p>着た服を写真で記録。似た気候が来たとき、過去のコーデを提案します。</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🗾</span>
+        <div>
+          <h3>全国気温マップ</h3>
+          <p>日本列島の気温を地図で一覧。タップで地域の詳細天気を確認できます。</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">👥</span>
+        <div>
+          <h3>みんなのコーデ</h3>
+          <p>友達・全国・自分のグループで、今日のコーデをシェアして参考にしよう。</p>
+        </div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📝</span>
+        <div>
+          <h3>体感メモ</h3>
+          <p>「暑かった」「ちょうどよかった」など体感を記録して次回に活かします。</p>
+        </div>
+      </div>
+    </div>
+    <button class="btn-start" onclick="App.start()">はじめる →</button>
+    <p class="intro-note">* 位置情報・カメラはブラウザの許可が必要です</p>
+  </div>
+</div>
+
+<!-- ==================== HOME VIEW ==================== -->
+<div id="view-home" class="view">
+  <div class="view-header">
+    <div>
+      <div class="header-location">📍 <span id="location-name">東京都・渋谷区</span></div>
+      <div class="header-date" id="today-date"></div>
+    </div>
+    <button class="icon-btn" onclick="App.refreshWeather()">🔄</button>
+  </div>
+
+  <!-- Weather Card -->
+  <div class="weather-card">
+    <div class="weather-main">
+      <div class="weather-icon-big" id="weather-icon-main">⛅</div>
+      <div class="weather-temps">
+        <div class="temp-now" id="temp-now">18°</div>
+        <div class="temp-range" id="temp-range">最高 23° / 最低 12°</div>
+        <div class="weather-desc" id="weather-desc">くもり時々晴れ</div>
+      </div>
+    </div>
+    <div class="weather-indices">
+      <div class="index-item">
+        <span class="index-icon">💧</span>
+        <span class="index-label">湿度</span>
+        <span class="index-val" id="idx-humidity">65%</span>
+      </div>
+      <div class="index-item">
+        <span class="index-icon">☂️</span>
+        <span class="index-label">降水</span>
+        <span class="index-val" id="idx-rain">20%</span>
+      </div>
+      <div class="index-item">
+        <span class="index-icon">🌞</span>
+        <span class="index-label">UV</span>
+        <span class="index-val" id="idx-uv">3</span>
+      </div>
+      <div class="index-item">
+        <span class="index-icon">👕</span>
+        <span class="index-label">洗濯</span>
+        <span class="index-val" id="idx-laundry">◎</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week Forecast -->
+  <div class="section-title">7日間予報</div>
+  <div class="week-forecast" id="week-forecast"></div>
+
+  <!-- AI Outfit Recommendation -->
+  <div class="section-title">AIコーデ提案 <span class="ai-badge">AI</span></div>
+  <div class="ai-card">
+    <div class="ai-avatar">🤖</div>
+    <div class="ai-bubble" id="ai-comment">今日は少し肌寒い曇り空。軽めのアウターが活躍しそうです。</div>
+  </div>
+  <div class="outfit-suggestion" id="outfit-suggestion">
+    <div class="outfit-item"><span class="outfit-emoji">🧥</span><span>薄手のジャケット</span></div>
+    <div class="outfit-item"><span class="outfit-emoji">👕</span><span>長袖Tシャツ</span></div>
+    <div class="outfit-item"><span class="outfit-emoji">👖</span><span>デニムパンツ</span></div>
+    <div class="outfit-item"><span class="outfit-emoji">👟</span><span>スニーカー</span></div>
+  </div>
+
+  <!-- Past Similar Day -->
+  <div id="similar-day-section" class="similar-day-section" style="display:none">
+    <div class="section-title">📅 似た日のコーデ</div>
+    <div id="similar-day-card" class="similar-card"></div>
+  </div>
+
+  <button class="btn-log-outfit" onclick="App.showLogOutfit()">📸 今日のコーデを記録</button>
+</div>
+
+<!-- ==================== MAP VIEW ==================== -->
+<div id="view-map" class="view">
+  <div class="view-header">
+    <h2>🗾 全国気温マップ</h2>
+    <div class="map-date" id="map-date"></div>
+  </div>
+  <div class="temp-legend">
+    <span class="legend-cold">寒</span>
+    <div class="legend-bar"></div>
+    <span class="legend-hot">暑</span>
+  </div>
+  <div class="japan-map-container">
+    <svg id="japan-map" viewBox="0 0 300 520" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hokkaido -->
+      <g class="region-group" data-region="hokkaido" onclick="App.showRegion('hokkaido')">
+        <ellipse cx="210" cy="50" rx="75" ry="38" class="region-shape" id="shape-hokkaido"/>
+        <text x="210" y="45" class="region-label">北海道</text>
+        <text x="210" y="62" class="region-temp" id="rtemp-hokkaido">3°</text>
+      </g>
+      <!-- Tohoku -->
+      <g class="region-group" data-region="tohoku" onclick="App.showRegion('tohoku')">
+        <ellipse cx="215" cy="120" rx="38" ry="42" class="region-shape" id="shape-tohoku"/>
+        <text x="215" y="116" class="region-label">東北</text>
+        <text x="215" y="132" class="region-temp" id="rtemp-tohoku">8°</text>
+      </g>
+      <!-- Kanto -->
+      <g class="region-group" data-region="kanto" onclick="App.showRegion('kanto')">
+        <ellipse cx="205" cy="200" rx="36" ry="30" class="region-shape" id="shape-kanto"/>
+        <text x="205" y="196" class="region-label">関東</text>
+        <text x="205" y="212" class="region-temp" id="rtemp-kanto">18°</text>
+      </g>
+      <!-- Chubu -->
+      <g class="region-group" data-region="chubu" onclick="App.showRegion('chubu')">
+        <ellipse cx="175" cy="230" rx="34" ry="28" class="region-shape" id="shape-chubu"/>
+        <text x="175" y="226" class="region-label">中部</text>
+        <text x="175" y="242" class="region-temp" id="rtemp-chubu">14°</text>
+      </g>
+      <!-- Kinki -->
+      <g class="region-group" data-region="kinki" onclick="App.showRegion('kinki')">
+        <ellipse cx="155" cy="280" rx="34" ry="26" class="region-shape" id="shape-kinki"/>
+        <text x="155" y="276" class="region-label">近畿</text>
+        <text x="155" y="292" class="region-temp" id="rtemp-kinki">16°</text>
+      </g>
+      <!-- Chugoku -->
+      <g class="region-group" data-region="chugoku" onclick="App.showRegion('chugoku')">
+        <ellipse cx="120" cy="300" rx="36" ry="20" class="region-shape" id="shape-chugoku"/>
+        <text x="120" y="296" class="region-label">中国</text>
+        <text x="120" y="312" class="region-temp" id="rtemp-chugoku">14°</text>
+      </g>
+      <!-- Shikoku -->
+      <g class="region-group" data-region="shikoku" onclick="App.showRegion('shikoku')">
+        <ellipse cx="145" cy="340" rx="30" ry="18" class="region-shape" id="shape-shikoku"/>
+        <text x="145" y="336" class="region-label">四国</text>
+        <text x="145" y="352" class="region-temp" id="rtemp-shikoku">17°</text>
+      </g>
+      <!-- Kyushu -->
+      <g class="region-group" data-region="kyushu" onclick="App.showRegion('kyushu')">
+        <ellipse cx="100" cy="385" rx="38" ry="38" class="region-shape" id="shape-kyushu"/>
+        <text x="100" y="381" class="region-label">九州</text>
+        <text x="100" y="397" class="region-temp" id="rtemp-kyushu">19°</text>
+      </g>
+      <!-- Okinawa -->
+      <g class="region-group" data-region="okinawa" onclick="App.showRegion('okinawa')">
+        <ellipse cx="60" cy="480" rx="28" ry="16" class="region-shape" id="shape-okinawa"/>
+        <text x="60" y="476" class="region-label">沖縄</text>
+        <text x="60" y="492" class="region-temp" id="rtemp-okinawa">24°</text>
+      </g>
+    </svg>
+  </div>
+  <p class="map-hint">地域をタップすると詳細を表示</p>
+</div>
+
+<!-- ==================== WARDROBE VIEW ==================== -->
+<div id="view-wardrobe" class="view">
+  <div class="view-header">
+    <h2>👗 マイワードローブ</h2>
+    <button class="icon-btn" onclick="App.showLogOutfit()">＋</button>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="App.filterWardrobe('all', this)">すべて</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('cold', this)">寒い日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('cool', this)">涼しい日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('warm', this)">暖かい日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('hot', this)">暑い日</button>
+  </div>
+  <div class="wardrobe-grid" id="wardrobe-grid">
+    <!-- Populated by JS -->
+  </div>
+  <div class="wardrobe-empty" id="wardrobe-empty" style="display:none">
+    <p>📷 まだコーデが記録されていません</p>
+    <button class="btn-start" onclick="App.showLogOutfit()">最初のコーデを記録</button>
+  </div>
+</div>
+
+<!-- ==================== GROUPS VIEW ==================== -->
+<div id="view-groups" class="view">
+  <div class="view-header">
+    <h2>👥 みんなのコーデ</h2>
+  </div>
+  <div class="group-tabs">
+    <button class="group-tab active" onclick="App.switchGroup('personal', this)">じぶん</button>
+    <button class="group-tab" onclick="App.switchGroup('friends', this)">ともだち</button>
+    <button class="group-tab" onclick="App.switchGroup('national', this)">全国</button>
+  </div>
+  <div id="group-feed" class="group-feed">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ==================== BOTTOM NAVIGATION ==================== -->
+<nav id="bottom-nav" style="display:none">
+  <button class="nav-item active" onclick="App.navigate('home')" id="nav-home">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">ホーム</span>
+  </button>
+  <button class="nav-item" onclick="App.navigate('map')" id="nav-map">
+    <span class="nav-icon">🗾</span>
+    <span class="nav-label">地図</span>
+  </button>
+  <button class="nav-item" onclick="App.navigate('wardrobe')" id="nav-wardrobe">
+    <span class="nav-icon">👗</span>
+    <span class="nav-label">記録</span>
+  </button>
+  <button class="nav-item" onclick="App.navigate('groups')" id="nav-groups">
+    <span class="nav-icon">👥</span>
+    <span class="nav-label">グループ</span>
+  </button>
+</nav>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Region Detail Modal -->
+<div id="modal-region" class="modal-overlay" onclick="App.closeModal('modal-region')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-region-title">地域名</h3>
+      <button class="modal-close" onclick="App.closeModal('modal-region')">✕</button>
+    </div>
+    <div id="modal-region-body" class="modal-body"></div>
+  </div>
+</div>
+
+<!-- Log Outfit Modal -->
+<div id="modal-log" class="modal-overlay" onclick="App.closeModal('modal-log')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>📸 コーデを記録</h3>
+      <button class="modal-close" onclick="App.closeModal('modal-log')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
+        <div id="photo-preview" class="photo-preview-placeholder">
+          <span style="font-size:2.5rem">📷</span>
+          <p>タップして写真を選択</p>
+          <p style="font-size:0.75rem;color:#aaa">またはカメラで撮影</p>
+        </div>
+        <img id="photo-preview-img" style="display:none; width:100%; border-radius:12px; max-height:200px; object-fit:cover">
+        <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="App.previewPhoto(event)">
+      </div>
+
+      <div class="log-info">
+        <div class="log-row">
+          <span>📅 日付</span>
+          <span id="log-date-display"></span>
+        </div>
+        <div class="log-row">
+          <span>🌡️ 気温</span>
+          <span id="log-temp-display"></span>
+        </div>
+        <div class="log-row">
+          <span>☁️ 天気</span>
+          <span id="log-weather-display"></span>
+        </div>
+      </div>
+
+      <div class="log-field">
+        <label>服装のメモ</label>
+        <input type="text" id="log-outfit-text" placeholder="例: 白シャツ + ベージュカーデ + デニム" class="text-input">
+      </div>
+
+      <div class="log-field">
+        <label>体感メモ</label>
+        <div class="feeling-btns">
+          <button class="feeling-btn" onclick="App.selectFeeling(this, 'too-cold')">🥶 寒すぎ</button>
+          <button class="feeling-btn" onclick="App.selectFeeling(this, 'cold')">😰 少し寒い</button>
+          <button class="feeling-btn" onclick="App.selectFeeling(this, 'perfect')">😊 ちょうど良い</button>
+          <button class="feeling-btn" onclick="App.selectFeeling(this, 'warm')">😅 少し暑い</button>
+          <button class="feeling-btn" onclick="App.selectFeeling(this, 'too-hot')">🥵 暑すぎ</button>
+        </div>
+      </div>
+
+      <div class="log-field">
+        <label>追加コメント</label>
+        <textarea id="log-comment" placeholder="例: 夕方から風が強かったのでアウターがあって正解" class="text-input" rows="2"></textarea>
+      </div>
+
+      <div class="log-share-row">
+        <label>グループにシェア</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="log-share-friends" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span>ともだち</span>
+        <label class="toggle-switch" style="margin-left:12px">
+          <input type="checkbox" id="log-share-national">
+          <span class="toggle-slider"></span>
+        </label>
+        <span>全国</span>
+      </div>
+
+      <button class="btn-save" onclick="App.saveOutfit()">記録する ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wardrobe Item Detail Modal -->
+<div id="modal-item" class="modal-overlay" onclick="App.closeModal('modal-item')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-item-title">コーデ詳細</h3>
+      <button class="modal-close" onclick="App.closeModal('modal-item')">✕</button>
+    </div>
+    <div id="modal-item-body" class="modal-body"></div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
