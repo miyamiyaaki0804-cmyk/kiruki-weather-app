@@ -465,6 +465,160 @@ html, body {
 /* タップ後はヒント非表示 */
 .map-hint.hidden { opacity: 0; transition: opacity 0.4s; }
 
+/* ===== FORECAST DAY TAP ===== */
+.forecast-day {
+  cursor: pointer;
+  touch-action: manipulation;
+  position: relative;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.forecast-day:hover  { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(29,78,216,0.20); }
+.forecast-day:active { transform: scale(0.94); }
+.forecast-tap-hint {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  margin-top: 2px;
+  display: block;
+}
+.forecast-day.today .forecast-tap-hint { opacity: 0.75; }
+
+/* ===== DAY PLAN MODAL ===== */
+.dayplan-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 14px;
+  flex-wrap: wrap;
+}
+.dayplan-temp-badge {
+  border-radius: 10px;
+  padding: 6px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+.dpt-label { font-size: 0.68rem; opacity: 0.8; }
+.dpt-val   { font-size: 1.4rem; font-weight: 900; line-height: 1.1; }
+.dayplan-temp-arrow { font-size: 1.2rem; color: var(--text-sub); }
+.dayplan-temp-swing {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+.dayplan-temp-swing.warn { background: #FEF3C7; color: #92400E; }
+
+/* 時間帯タイムライン */
+.dayplan-timeline {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 14px 8px 10px;
+  margin-bottom: 14px;
+  gap: 4px;
+}
+.dpt-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.dpt-time  { font-size: 0.72rem; font-weight: 700; color: var(--text-sub); }
+.dpt-thermometer {
+  display: flex;
+  align-items: flex-end;
+  height: 80px;
+}
+.dpt-bar {
+  width: 20px;
+  border-radius: 4px 4px 0 0;
+  min-height: 12px;
+  transition: height 0.4s ease;
+}
+.dpt-temp { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+.dpt-item {
+  font-size: 0.68rem;
+  color: var(--text-sub);
+  text-align: center;
+  font-weight: 600;
+  max-width: 72px;
+  line-height: 1.3;
+}
+
+/* アドバイスバナー */
+.dayplan-advice {
+  background: #FFF7ED;
+  border-left: 4px solid #F59E0B;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  color: #78350F;
+  font-weight: 600;
+}
+
+/* コーデグリッド */
+.dayplan-section-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dayplan-ai-comment {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+.dayplan-outfit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.dayplan-outfit-item {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.dayplan-outfit-item.rain { border-left-color: #06B6D4; }
+.dayplan-outfit-emoji { font-size: 1.2rem; }
+
+/* 過去コーデ */
+.dayplan-wardrobe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.dayplan-wardrobe-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+}
+
 /* ===== RANK VIEW ===== */
 .rank-list {
   padding: 10px 14px;

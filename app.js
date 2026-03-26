@@ -509,12 +509,15 @@ const App = {
     w.forecast.forEach((d, i) => {
       const el = document.createElement('div');
       el.className = 'forecast-day' + (i === 0 ? ' today' : '');
+      el.setAttribute('title', `${d.day}の服装プランを見る`);
       el.innerHTML = `
         <div class="forecast-dayname">${d.day}</div>
         <div class="forecast-icon">${d.icon}</div>
         <div class="forecast-high">${d.high}°</div>
         <div class="forecast-low">${d.low}°</div>
+        <div class="forecast-tap-hint">👆</div>
       `;
+      el.onclick = () => App.showDayPlan(d, i);
       fc.appendChild(el);
     });
 
@@ -532,6 +535,129 @@ const App = {
 
     // Similar day
     this.showSimilarDay(w.temp);
+  },
+
+  showDayPlan(d, dayIndex) {
+    // 気温推定: 朝=低め, 昼=最高, 夕=中間, 夜=最低
+    const swing = d.high - d.low;
+    const morn  = Math.round(d.low  + swing * 0.15);
+    const noon  = d.high;
+    const eve   = Math.round(d.low  + swing * 0.35);
+    const night = d.low;
+    const avgTemp = Math.round((d.high + d.low) / 2);
+
+    // 降水リスク推定 (iconから)
+    const hasRain = /🌧️|🌦️|☔|🌨️/.test(d.icon);
+    const hasSnow = /🌨️|❄️/.test(d.icon);
+
+    // AI outfitを朝・昼・夜それぞれ生成
+    const outfitMorn  = getAIOutfit(morn,  hasRain ? '雨' : '晴れ');
+    const outfitNoon  = getAIOutfit(noon,  hasRain ? '雨' : '晴れ');
+    const outfitNight = getAIOutfit(night, '曇り');
+
+    // 一日通じたアドバイス
+    let dayAdvice = '';
+    if (swing >= 10) dayAdvice += '⚠️ <strong>気温差が大きい日</strong>です。脱ぎ着しやすい重ね着を。';
+    if (hasRain)     dayAdvice += (dayAdvice ? '<br>' : '') + '☔ 雨が予想されます。<strong>折り畳み傘</strong>を忘れずに。';
+    if (hasSnow)     dayAdvice += (dayAdvice ? '<br>' : '') + '❄️ 雪の可能性あり。<strong>防水・滑り止め</strong>の靴がおすすめ。';
+    if (noon >= 28)  dayAdvice += (dayAdvice ? '<br>' : '') + '🌡️ <strong>熱中症注意</strong>。こまめな水分補給を。';
+    if (noon <= 5)   dayAdvice += (dayAdvice ? '<br>' : '') + '🥶 <strong>防寒必須</strong>。露出を最小限に。';
+
+    // 類似ワードローブ
+    const similar = State.wardrobe.filter(w => Math.abs(w.temp - avgTemp) <= 4);
+
+    // タイトル
+    const label = dayIndex === 0 ? '今日' : dayIndex === 1 ? '明日' : d.day;
+    document.getElementById('day-plan-title').textContent = `${d.icon} ${label}の服装プラン`;
+
+    document.getElementById('day-plan-body').innerHTML = `
+      <!-- 気温サマリー -->
+      <div class="dayplan-temp-row">
+        <div class="dayplan-temp-badge" style="background:var(--primary-dark);color:white">
+          <span class="dpt-label">最高</span>
+          <span class="dpt-val">${d.high}°</span>
+        </div>
+        <div class="dayplan-temp-arrow">→</div>
+        <div class="dayplan-temp-badge" style="background:#E0E8FF;color:var(--primary-dark)">
+          <span class="dpt-label">最低</span>
+          <span class="dpt-val">${d.low}°</span>
+        </div>
+        <div class="dayplan-temp-swing ${swing >= 10 ? 'warn' : ''}">
+          気温差 ${swing}°${swing >= 10 ? ' ⚠️' : ''}
+        </div>
+      </div>
+
+      <!-- 時間帯別気温バー -->
+      <div class="dayplan-timeline">
+        <div class="dpt-slot">
+          <div class="dpt-time">🌅 朝</div>
+          <div class="dpt-thermometer">
+            <div class="dpt-bar" style="height:${40 + (morn/d.high)*40}px;background:${tempColor(morn)}"></div>
+          </div>
+          <div class="dpt-temp">${morn}°</div>
+          <div class="dpt-item">${outfitMorn.items[0].emoji} ${outfitMorn.items[0].label}</div>
+        </div>
+        <div class="dpt-slot">
+          <div class="dpt-time">☀️ 昼</div>
+          <div class="dpt-thermometer">
+            <div class="dpt-bar" style="height:80px;background:${tempColor(noon)}"></div>
+          </div>
+          <div class="dpt-temp">${noon}°</div>
+          <div class="dpt-item">${outfitNoon.items[0].emoji} ${outfitNoon.items[0].label}</div>
+        </div>
+        <div class="dpt-slot">
+          <div class="dpt-time">🌆 夕</div>
+          <div class="dpt-thermometer">
+            <div class="dpt-bar" style="height:${30 + (eve/d.high)*50}px;background:${tempColor(eve)}"></div>
+          </div>
+          <div class="dpt-temp">${eve}°</div>
+          <div class="dpt-item">${outfitMorn.items[0].emoji} 羽織もの持参</div>
+        </div>
+        <div class="dpt-slot">
+          <div class="dpt-time">🌙 夜</div>
+          <div class="dpt-thermometer">
+            <div class="dpt-bar" style="height:${20 + (night/d.high)*40}px;background:${tempColor(night)}"></div>
+          </div>
+          <div class="dpt-temp">${night}°</div>
+          <div class="dpt-item">${outfitNight.items[0].emoji} ${outfitNight.items[0].label}</div>
+        </div>
+      </div>
+
+      <!-- AIアドバイス -->
+      ${dayAdvice ? `<div class="dayplan-advice">${dayAdvice}</div>` : ''}
+
+      <!-- 一日コーデ提案 -->
+      <div class="dayplan-section-title">🤖 一日を通じたAIコーデ</div>
+      <div class="dayplan-ai-comment">${getAIOutfit(avgTemp, d.icon).comment}</div>
+      <div class="dayplan-outfit-grid">
+        ${getAIOutfit(avgTemp, d.icon).items.map(item => `
+          <div class="dayplan-outfit-item">
+            <span class="dayplan-outfit-emoji">${item.emoji}</span>
+            <span>${item.label}</span>
+          </div>
+        `).join('')}
+        ${hasRain ? `<div class="dayplan-outfit-item rain">☔<span>折り畳み傘</span></div>` : ''}
+      </div>
+
+      <!-- 過去の似た日 -->
+      ${similar.length > 0 ? `
+        <div class="dayplan-section-title">📂 似た気温の過去コーデ</div>
+        <div class="dayplan-wardrobe-list">
+          ${similar.slice(0, 3).map(w => `
+            <div class="dayplan-wardrobe-item">
+              <span style="font-size:1.6rem">${w.emoji || '👕'}</span>
+              <div>
+                <div style="font-size:0.78rem;color:var(--text-sub)">${w.date} / ${w.temp}°C ${w.icon || ''}</div>
+                <div style="font-weight:600;font-size:0.88rem">${w.outfit}</div>
+                ${w.feeling ? `<div style="font-size:0.75rem;color:var(--primary-dark)">${FEELING_LABELS[w.feeling] || ''}</div>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+
+    this.openModal('modal-day-plan');
   },
 
   showSimilarDay(temp) {

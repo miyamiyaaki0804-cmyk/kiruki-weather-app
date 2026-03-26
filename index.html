@@ -476,6 +476,17 @@
 
 <!-- ==================== MODALS ==================== -->
 
+<!-- Day Plan Modal -->
+<div id="modal-day-plan" class="modal-overlay" onclick="App.closeModal('modal-day-plan')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="day-plan-title">日付</h3>
+      <button class="modal-close" onclick="App.closeModal('modal-day-plan')">✕</button>
+    </div>
+    <div id="day-plan-body" class="modal-body"></div>
+  </div>
+</div>
+
 <!-- Region Detail Modal -->
 <div id="modal-region" class="modal-overlay" onclick="App.closeModal('modal-region')">
   <div class="modal-box" onclick="event.stopPropagation()">
