@@ -111,6 +111,28 @@
 
       <div class="auth-divider"><span>または</span></div>
       <button class="btn-auth-guest" onclick="Auth.continueAsGuest()">ゲストとして使う（データは端末に保存）</button>
+
+      <!-- ===== 位置情報ステップ (登録/ログイン後に表示) ===== -->
+      <div id="auth-location-step" style="display:none">
+        <div class="loc-step-icon">📍</div>
+        <h3 class="loc-step-title">現在地の天気を表示しますか？</h3>
+        <p class="loc-step-desc">
+          位置情報を許可すると、あなたの地域の<br>
+          リアルタイム天気と服装提案が表示されます
+        </p>
+        <div class="loc-step-benefits">
+          <div class="loc-benefit">🌡️ 現在地の気温・天気</div>
+          <div class="loc-benefit">👕 その日のコーデ提案</div>
+          <div class="loc-benefit">📅 7日間の服装プラン</div>
+        </div>
+        <button class="btn-loc-allow" id="btn-loc-allow" onclick="Auth.requestLocation()">
+          📍 位置情報を許可する（推奨）
+        </button>
+        <button class="btn-loc-skip" onclick="Auth.skipLocation()">
+          スキップ（東京の情報で続ける）
+        </button>
+        <p class="loc-step-note">※ 位置情報は端末内のみで使用し、外部に送信しません</p>
+      </div>
     </div>
 
     <div class="auth-feature-strip">

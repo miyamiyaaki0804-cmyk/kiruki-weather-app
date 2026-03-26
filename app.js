@@ -282,19 +282,6 @@ const Auth = {
     document.getElementById('reg-error').textContent = '';
   },
 
-  login() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const errEl = document.getElementById('login-error');
-    if (!email || !password) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
-    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) { errEl.textContent = 'メールアドレスまたはパスワードが違います'; return; }
-    localStorage.setItem('kiruki_user', JSON.stringify(user));
-    State.user = user;
-    App.launchApp();
-  },
-
   register() {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
@@ -310,12 +297,118 @@ const Auth = {
     localStorage.setItem('kiruki_users', JSON.stringify(users));
     localStorage.setItem('kiruki_user', JSON.stringify(user));
     State.user = user;
-    App.launchApp();
+    // 新規登録は必ず位置情報ステップへ
+    this.showLocationStep();
+  },
+
+  login() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    if (!email || !password) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
+    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) { errEl.textContent = 'メールアドレスまたはパスワードが違います'; return; }
+    localStorage.setItem('kiruki_user', JSON.stringify(user));
+    State.user = user;
+    // ログイン済みで位置情報未取得なら聞く
+    if (!Location.load()) {
+      this.showLocationStep();
+    } else {
+      App.launchApp();
+    }
   },
 
   continueAsGuest() {
     State.user = { name: 'ゲスト', email: '', id: 'guest', emoji: '👤' };
+    if (!Location.load()) {
+      this.showLocationStep();
+    } else {
+      App.launchApp();
+    }
+  },
+
+  showLocationStep() {
+    // フォームを隠して位置情報ステップを表示
+    ['auth-login-form', 'auth-register-form'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.querySelector('.auth-tabs').style.display  = 'none';
+    document.querySelector('.auth-divider').style.display = 'none';
+    document.querySelector('.btn-auth-guest').style.display = 'none';
+    document.getElementById('auth-location-step').style.display = 'block';
+  },
+
+  requestLocation() {
+    if (!navigator.geolocation) {
+      this.skipLocation();
+      return;
+    }
+    const btn = document.getElementById('btn-loc-allow');
+    btn.textContent = '📡 取得中...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const region = Location.findNearestRegion(latitude, longitude);
+        Location.save(region, latitude, longitude);
+        App.launchApp();
+      },
+      (err) => {
+        // 拒否または失敗 → スキップ
+        btn.textContent = '📍 位置情報を許可する（推奨）';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        const note = document.querySelector('.loc-step-note');
+        if (note) note.textContent = '⚠️ 取得できませんでした。スキップして続けることができます。';
+        note.style.color = '#DC2626';
+      },
+      { timeout: 10000, maximumAge: 0 }
+    );
+  },
+
+  skipLocation() {
     App.launchApp();
+  }
+};
+
+// ===== LOCATION UTIL =====
+const Location = {
+  REGIONS: {
+    hokkaido: { lat: 43.06, lon: 141.35, label: '北海道・札幌市' },
+    tohoku:   { lat: 38.27, lon: 140.87, label: '東北・仙台市' },
+    kanto:    { lat: 35.69, lon: 139.69, label: '関東・東京都' },
+    chubu:    { lat: 36.65, lon: 137.21, label: '中部・名古屋市' },
+    kinki:    { lat: 34.69, lon: 135.50, label: '近畿・大阪府' },
+    chugoku:  { lat: 34.40, lon: 132.46, label: '中国・広島市' },
+    shikoku:  { lat: 33.56, lon: 133.53, label: '四国・高知市' },
+    kyushu:   { lat: 33.59, lon: 130.42, label: '九州・福岡市' },
+    okinawa:  { lat: 26.21, lon: 127.68, label: '沖縄・那覇市' }
+  },
+
+  findNearestRegion(lat, lon) {
+    let nearest = 'kanto', minDist = Infinity;
+    for (const [key, r] of Object.entries(this.REGIONS)) {
+      const d = Math.hypot(lat - r.lat, lon - r.lon);
+      if (d < minDist) { minDist = d; nearest = key; }
+    }
+    return nearest;
+  },
+
+  load() {
+    const raw = localStorage.getItem('kiruki_location');
+    return raw ? JSON.parse(raw) : null;
+  },
+
+  save(region, lat, lon) {
+    localStorage.setItem('kiruki_location', JSON.stringify({ region, lat, lon }));
+  },
+
+  clear() {
+    localStorage.removeItem('kiruki_location');
   }
 };
 
@@ -480,14 +573,40 @@ const App = {
   refreshWeather() {
     const btn = document.querySelector('.view-header .icon-btn');
     if (btn) { btn.style.transform = 'rotate(360deg)'; btn.style.transition = 'transform 0.5s'; setTimeout(() => { btn.style.transform = ''; btn.style.transition = ''; }, 500); }
-    this.initHome();
-    this.showToast('天気情報を更新しました');
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const region = Location.findNearestRegion(pos.coords.latitude, pos.coords.longitude);
+          Location.save(region, pos.coords.latitude, pos.coords.longitude);
+          this.initHome();
+          this.showToast('📍 現在地の天気に更新しました');
+        },
+        () => {
+          this.initHome();
+          this.showToast('天気情報を更新しました');
+        },
+        { timeout: 6000, maximumAge: 60000 }
+      );
+    } else {
+      this.initHome();
+      this.showToast('天気情報を更新しました');
+    }
   },
 
   // ===== HOME =====
   initHome() {
-    const w = JAPAN_WEATHER.kanto;
+    // 位置情報から地域を決定
+    const locData = Location.load();
+    const regionKey = locData ? locData.region : 'kanto';
+    const w = JAPAN_WEATHER[regionKey] || JAPAN_WEATHER.kanto;
     const now = new Date();
+
+    // Header location
+    const locLabel = locData
+      ? (Location.REGIONS[regionKey]?.label || w.city)
+      : w.city;
+    document.getElementById('location-name').textContent = locLabel;
 
     // Header
     document.getElementById('today-date').textContent =
