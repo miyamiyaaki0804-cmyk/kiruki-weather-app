@@ -520,6 +520,13 @@ html, body {
   animation: tapBounce 0.3s ease;
   filter: brightness(1.35);
 }
+/* 都道府県境界線（GeoJSONレンダリング時） */
+.pref-boundary {
+  fill: none;
+  stroke: rgba(255,255,255,0.25);
+  stroke-width: 0.5;
+  pointer-events: none;
+}
 /* タップリップル (SVG circle で実装) */
 .tap-ripple {
   pointer-events: none;

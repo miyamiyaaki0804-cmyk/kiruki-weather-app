@@ -818,13 +818,20 @@ const App = {
     if (mapDate) mapDate.textContent = `${now.getMonth()+1}月${now.getDate()}日 現在`;
 
     Object.entries(JAPAN_WEATHER).forEach(([key, w]) => {
-      const shape = document.getElementById(`shape-${key}`);
+      const color = tempColor(w.temp);
+      // id="shape-{key}" 後方互換 (fallback + GeoJSON 1枚目)
+      const shapeEl = document.getElementById(`shape-${key}`);
+      if (shapeEl) shapeEl.setAttribute('fill', color);
+      // GeoJSONレンダリング後: 全都道府県パスに一括着色
+      document.querySelectorAll(`.region-shape[data-region="${key}"]`).forEach(el => {
+        el.setAttribute('fill', color);
+      });
+      // バッジ円
       const badge = document.getElementById(`badge-${key}`);
+      if (badge) badge.setAttribute('fill', color);
+      // テキスト
       const tempEl = document.getElementById(`rtemp-${key}`);
       const iconEl = document.getElementById(`icon-${key}`);
-      const color = tempColor(w.temp);
-      if (shape) shape.setAttribute('fill', color);
-      if (badge) badge.setAttribute('fill', color);
       if (tempEl) tempEl.textContent = `${w.temp}°`;
       if (iconEl) iconEl.textContent = w.icon;
     });
@@ -1423,15 +1430,24 @@ const App = {
 
 // Init map colors on load (before start)
 window.addEventListener('DOMContentLoaded', () => {
+  // フォールバック: 手書きSVGに初期色を適用
   Object.entries(JAPAN_WEATHER).forEach(([key, w]) => {
+    const color = tempColor(w.temp);
     const shape = document.getElementById(`shape-${key}`);
     const badge = document.getElementById(`badge-${key}`);
-    const color = tempColor(w.temp);
     if (shape) shape.setAttribute('fill', color);
     if (badge) badge.setAttribute('fill', color);
   });
   const mapDate = document.getElementById('map-date');
   if (mapDate) mapDate.textContent = '';
+
+  // GeoJSON地図を非同期で読み込み・描画
+  // 完了後 initMap() で気温カラーを再適用
+  if (window.MapGeo) {
+    MapGeo.init(() => {
+      if (window.App && App.initMap) App.initMap();
+    });
+  }
 
   // Auto-login returning user (skip intro + auth)
   if (Auth.init()) {

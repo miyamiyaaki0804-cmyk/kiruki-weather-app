@@ -1,0 +1,19 @@
+{
+  "name": "kiruki-weather-app",
+  "version": "1.0.0",
+  "description": "KiruKi - 着る気象アプリ",
+  "private": true,
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . --listen 3000"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.0",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  },
+  "license": "MIT",
+  "author": "KiruKi App"
+}
