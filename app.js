@@ -339,32 +339,51 @@ const Auth = {
 
   requestLocation() {
     if (!navigator.geolocation) {
-      this.skipLocation();
+      this._locError('お使いのブラウザは位置情報に対応していません。');
       return;
     }
     const btn = document.getElementById('btn-loc-allow');
-    btn.textContent = '📡 取得中...';
+    btn.innerHTML = '<span style="display:inline-block;animation:spin 1s linear infinite">📡</span> 取得中...';
     btn.disabled = true;
-    btn.style.opacity = '0.7';
+    btn.style.opacity = '0.75';
 
+    // ステップ1: ネットワーク測位（速い・省電力）で試行
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const region = Location.findNearestRegion(latitude, longitude);
-        Location.save(region, latitude, longitude);
-        App.launchApp();
-      },
+      (pos) => this._locSuccess(pos),
       (err) => {
-        // 拒否または失敗 → スキップ
-        btn.textContent = '📍 位置情報を許可する（推奨）';
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        const note = document.querySelector('.loc-step-note');
-        if (note) note.textContent = '⚠️ 取得できませんでした。スキップして続けることができます。';
-        note.style.color = '#DC2626';
+        if (err.code === 1) {
+          // PERMISSION_DENIED: ユーザーが拒否
+          this._locError(
+            '位置情報が拒否されました。<br>' +
+            'ブラウザの設定から許可を変更するか、スキップしてください。'
+          );
+        } else {
+          // POSITION_UNAVAILABLE or TIMEOUT: GPSで再試行
+          navigator.geolocation.getCurrentPosition(
+            (pos) => this._locSuccess(pos),
+            () => this._locError('位置情報を取得できませんでした。<br>電波の良い場所で再試行するか、スキップしてください。'),
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+          );
+        }
       },
-      { timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
     );
+  },
+
+  _locSuccess(pos) {
+    const { latitude, longitude } = pos.coords;
+    const region = Location.findNearestRegion(latitude, longitude);
+    Location.save(region, latitude, longitude);
+    App.launchApp();
+  },
+
+  _locError(msg) {
+    const btn = document.getElementById('btn-loc-allow');
+    btn.textContent = '📍 もう一度試す';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    const note = document.querySelector('.loc-step-note');
+    if (note) { note.innerHTML = '⚠️ ' + msg; note.style.color = '#DC2626'; }
   },
 
   skipLocation() {
@@ -583,7 +602,7 @@ const App = {
           this.initHome();
           this.showToast('天気情報を更新しました');
         },
-        { timeout: 6000, maximumAge: 60000 }
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
       );
     } else {
       this.initHome();

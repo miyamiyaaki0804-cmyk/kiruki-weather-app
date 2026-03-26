@@ -11,53 +11,56 @@
 <!-- ==================== INTRO VIEW ==================== -->
 <div id="view-intro" class="view active">
   <div class="intro-bg">
-    <div class="intro-clouds"></div>
+    <div class="intro-orbs"></div>
   </div>
-  <div class="intro-content">
-    <div class="intro-logo">
-      <div class="logo-icon">👕</div>
-      <h1 class="logo-title">KiruKi</h1>
-      <p class="logo-sub">着る気象アプリ</p>
+  <div class="intro-scroll">
+    <!-- Hero -->
+    <div class="intro-hero">
+      <div class="intro-hero-icon">👕</div>
+      <h1 class="intro-hero-title">KiruKi</h1>
+      <p class="intro-hero-tag">着る気象アプリ</p>
+      <p class="intro-hero-copy">今日の天気に合った服装を<br>AIが毎朝提案します</p>
     </div>
+
+    <!-- Feature grid -->
     <div class="intro-features">
-      <div class="feature-card">
-        <span class="feature-icon">🌡️</span>
-        <div>
-          <h3>AIコーデ提案</h3>
-          <p>今日の気温・天気に合わせて、AIがぴったりの服装をおすすめします。</p>
-        </div>
+      <div class="intro-feat" style="--fi:0">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444)">🌡️</div>
+        <div class="intro-feat-name">AIコーデ提案</div>
+        <div class="intro-feat-desc">気温・天気に合わせた服装を毎日提案</div>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">📸</span>
-        <div>
-          <h3>コーデ記録</h3>
-          <p>着た服を写真で記録。似た気候が来たとき、過去のコーデを提案します。</p>
-        </div>
+      <div class="intro-feat" style="--fi:1">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#8B5CF6,#EC4899)">📸</div>
+        <div class="intro-feat-name">コーデ記録</div>
+        <div class="intro-feat-desc">写真で記録、似た日に自動で提案</div>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">🗾</span>
-        <div>
-          <h3>全国気温マップ</h3>
-          <p>日本列島の気温を地図で一覧。タップで地域の詳細天気を確認できます。</p>
-        </div>
+      <div class="intro-feat" style="--fi:2">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#10B981,#06B6D4)">🗾</div>
+        <div class="intro-feat-name">全国気温マップ</div>
+        <div class="intro-feat-desc">日本列島の気温をタップで詳細確認</div>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">👥</span>
-        <div>
-          <h3>みんなのコーデ</h3>
-          <p>友達・全国・自分のグループで、今日のコーデをシェアして参考にしよう。</p>
-        </div>
+      <div class="intro-feat" style="--fi:3">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">👥</div>
+        <div class="intro-feat-name">みんなのコーデ</div>
+        <div class="intro-feat-desc">友達・全国とコーデをシェア</div>
       </div>
-      <div class="feature-card">
-        <span class="feature-icon">📝</span>
-        <div>
-          <h3>体感メモ</h3>
-          <p>「暑かった」「ちょうどよかった」など体感を記録して次回に活かします。</p>
-        </div>
+      <div class="intro-feat" style="--fi:4">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#F97316,#EAB308)">📅</div>
+        <div class="intro-feat-name">7日間プラン</div>
+        <div class="intro-feat-desc">予報をタップでその日の服装を計画</div>
+      </div>
+      <div class="intro-feat" style="--fi:5">
+        <div class="intro-feat-icon" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">📝</div>
+        <div class="intro-feat-name">体感メモ</div>
+        <div class="intro-feat-desc">「暑かった」を記録して次回に活用</div>
       </div>
     </div>
-    <button class="btn-start" onclick="App.goToAuth()">はじめる →</button>
-    <p class="intro-note">* 位置情報・カメラはブラウザの許可が必要です</p>
+
+    <!-- CTA -->
+    <div class="intro-cta">
+      <button class="btn-start" onclick="App.goToAuth()">はじめる →</button>
+      <p class="intro-note">* 位置情報・カメラはブラウザの許可が必要です</p>
+    </div>
   </div>
 </div>
 
