@@ -321,11 +321,8 @@ const Auth = {
 
   continueAsGuest() {
     State.user = { name: 'ゲスト', email: '', id: 'guest', emoji: '👤' };
-    if (!Location.load()) {
-      this.showLocationStep();
-    } else {
-      App.launchApp();
-    }
+    // ゲストは毎回位置情報ステップを表示（セッションが毎回新しいため）
+    this.showLocationStep();
   },
 
   showLocationStep() {
