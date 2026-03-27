@@ -1670,7 +1670,13 @@ window.addEventListener('DOMContentLoaded', () => {
         emoji: profile.emoji || '😊',
       };
       document.getElementById('view-intro').classList.add('hidden');
-      App.launchApp();
+      // 位置情報未取得の場合は確認画面を表示
+      if (!Location.load()) {
+        document.getElementById('view-auth').classList.add('active');
+        Auth.showLocationStep();
+      } else {
+        App.launchApp();
+      }
     }
   });
 });
