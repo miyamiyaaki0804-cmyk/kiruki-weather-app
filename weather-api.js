@@ -101,6 +101,26 @@ const WeatherAPI = {
     return res.json();
   },
 
+  // GPS座標を直接指定して1地点のデータを取得（ホーム画面用）
+  async fetchForCoords(lat, lon, regionKey) {
+    const url =
+      `https://api.open-meteo.com/v1/forecast` +
+      `?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m` +
+      `&daily=temperature_2m_max,temperature_2m_min,weather_code,` +
+      `precipitation_probability_max,uv_index_max` +
+      `&timezone=Asia%2FTokyo&forecast_days=7`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const api = await res.json();
+    // _build に必要な coords を上書きして渡す
+    const origCoords = this.REGION_COORDS[regionKey];
+    this.REGION_COORDS[regionKey] = { ...origCoords, lat, lon };
+    const result = this._build(regionKey, api);
+    this.REGION_COORDS[regionKey] = origCoords; // 戻す
+    return result;
+  },
+
   // キャッシュ読み込み (30分以内ならそのまま使う)
   _loadCache() {
     try {

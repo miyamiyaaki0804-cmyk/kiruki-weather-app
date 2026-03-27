@@ -613,19 +613,24 @@ const App = {
   async _loadRealWeather() {
     if (!window.WeatherAPI) return;
     try {
+      // 全9地域を取得
       const realData = await WeatherAPI.fetchAll();
-      let updated = false;
       Object.entries(realData).forEach(([key, data]) => {
-        if (data && JAPAN_WEATHER[key]) {
-          Object.assign(JAPAN_WEATHER[key], data);
-          updated = true;
-        }
+        if (data && JAPAN_WEATHER[key]) Object.assign(JAPAN_WEATHER[key], data);
       });
-      if (updated) {
-        this.initHome();
-        this.initMap();
-        this.showToast('🌤️ リアルタイム天気に更新しました');
+
+      // ユーザーのGPS座標が保存されていれば、その地点を直接取得（精度向上）
+      const locData = Location.load();
+      if (locData?.lat && locData?.lon && locData?.region) {
+        const exactData = await WeatherAPI.fetchForCoords(locData.lat, locData.lon, locData.region);
+        if (exactData && JAPAN_WEATHER[locData.region]) {
+          Object.assign(JAPAN_WEATHER[locData.region], exactData);
+        }
       }
+
+      this.initHome();
+      this.initMap();
+      this.showToast('🌤️ リアルタイム天気に更新しました');
     } catch {
       // サイレントフェイル: モックデータのまま継続
     }
@@ -657,19 +662,26 @@ const App = {
     // キャッシュをクリアして最新データを取得
     if (window.WeatherAPI) WeatherAPI.clearCache();
 
-    const afterGeo = () => {
+    const afterGeo = async () => {
       if (window.WeatherAPI) {
-        WeatherAPI.fetchAll().then(realData => {
+        try {
+          const realData = await WeatherAPI.fetchAll();
           Object.entries(realData).forEach(([key, data]) => {
             if (data && JAPAN_WEATHER[key]) Object.assign(JAPAN_WEATHER[key], data);
           });
+          // GPS座標が保存されていれば精度の高いデータで上書き
+          const locData = Location.load();
+          if (locData?.lat && locData?.lon && locData?.region) {
+            const exactData = await WeatherAPI.fetchForCoords(locData.lat, locData.lon, locData.region);
+            if (exactData && JAPAN_WEATHER[locData.region]) Object.assign(JAPAN_WEATHER[locData.region], exactData);
+          }
           this.initHome();
           this.initMap();
           this.showToast('🌤️ 天気情報を更新しました');
-        }).catch(() => {
+        } catch {
           this.initHome();
           this.showToast('天気情報を更新しました');
-        });
+        }
       } else {
         this.initHome();
         this.showToast('天気情報を更新しました');
