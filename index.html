@@ -514,6 +514,77 @@
   </div>
 </div>
 
+<!-- ==================== PROFILE VIEW ==================== -->
+<div id="view-profile" class="view">
+  <div class="view-header">
+    <h2>👤 プロフィール</h2>
+  </div>
+  <div class="view-scroll">
+
+    <!-- Hero -->
+    <div class="profile-hero">
+      <button class="profile-avatar-btn" onclick="Profile.pickEmoji()" id="profile-avatar" title="タップでアバター変更">😊</button>
+      <div class="profile-name-row">
+        <span class="profile-display-name" id="profile-display-name">ユーザー名</span>
+        <button class="profile-edit-btn" onclick="Profile.startEdit()">✏️ 編集</button>
+      </div>
+      <div class="profile-email" id="profile-email">-</div>
+    </div>
+
+    <!-- Edit name -->
+    <div id="profile-edit-section" class="profile-section" style="display:none">
+      <div class="profile-section-title">名前を変更</div>
+      <input type="text" id="profile-name-input" class="text-input" placeholder="新しい名前を入力">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-profile-cancel" onclick="Profile.cancelEdit()">キャンセル</button>
+        <button class="btn-profile-save" onclick="Profile.saveEdit()">保存</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="profile-section">
+      <div class="profile-section-title">📊 あなたの記録</div>
+      <div class="profile-stats">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-wardrobe">0</div>
+          <div class="stat-label">コーデ記録</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-groups">0</div>
+          <div class="stat-label">グループ</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-days">-</div>
+          <div class="stat-label">利用日数</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Location -->
+    <div class="profile-section">
+      <div class="profile-section-title">📍 登録済み位置情報</div>
+      <div class="profile-loc-row">
+        <span id="profile-location" class="profile-loc-val">未設定</span>
+        <button class="btn-small-danger" onclick="Profile.resetLocation()">リセット</button>
+      </div>
+    </div>
+
+    <!-- Data notice -->
+    <div class="profile-section">
+      <div class="profile-section-title">ℹ️ データについて</div>
+      <div class="profile-note">
+        データはこのブラウザ（localStorage）に保存されています。ブラウザのキャッシュを削除するとデータが失われます。異なるデバイス・ブラウザ間での同期には対応していません。
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="profile-section">
+      <button class="btn-logout" onclick="Profile.logout()">🚪 ログアウト</button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ==================== BOTTOM NAVIGATION ==================== -->
 <nav id="bottom-nav" style="display:none">
   <button class="nav-item active" onclick="App.navigate('home')" id="nav-home">
@@ -531,6 +602,10 @@
   <button class="nav-item" onclick="App.navigate('groups')" id="nav-groups">
     <span class="nav-icon">👥</span>
     <span class="nav-label">グループ</span>
+  </button>
+  <button class="nav-item" onclick="App.navigate('profile')" id="nav-profile">
+    <span class="nav-icon">👤</span>
+    <span class="nav-label">マイページ</span>
   </button>
 </nav>
 
@@ -654,6 +729,8 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <!-- GeoJSON地図レンダラー -->
 <script src="map-geo.js"></script>
+<!-- Open-Meteo リアルタイム天気APIモジュール -->
+<script src="weather-api.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

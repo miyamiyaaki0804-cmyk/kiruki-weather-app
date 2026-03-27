@@ -525,11 +525,25 @@ const State = {
   wardrobe: [],
   user: null,
 
+  // ユーザー別のlocalStorageキー生成
+  _key(base) {
+    const uid = this.user?.id || 'guest';
+    return `kiruki_${base}_${uid}`;
+  },
+
   init() {
-    const saved = localStorage.getItem('kiruki_wardrobe');
-    this.wardrobe = saved ? JSON.parse(saved) : [...SAMPLE_WARDROBE];
-    // Restore any generated invite code
-    const code = localStorage.getItem('kiruki_my_code');
+    // ユーザー別キーで保存 (旧データは共通キーからマイグレーション)
+    const userKey = this._key('wardrobe');
+    const saved = localStorage.getItem(userKey);
+    if (saved) {
+      this.wardrobe = JSON.parse(saved);
+    } else {
+      // 旧共通キーからのマイグレーション (初回のみ)
+      const legacy = localStorage.getItem('kiruki_wardrobe');
+      this.wardrobe = legacy ? JSON.parse(legacy) : [...SAMPLE_WARDROBE];
+    }
+    // 招待コードを復元
+    const code = localStorage.getItem(this._key('my_code'));
     if (code) {
       const el = document.getElementById('my-invite-code');
       if (el) el.textContent = code;
@@ -537,7 +551,7 @@ const State = {
   },
 
   saveWardrobe() {
-    localStorage.setItem('kiruki_wardrobe', JSON.stringify(this.wardrobe));
+    localStorage.setItem(this._key('wardrobe'), JSON.stringify(this.wardrobe));
   }
 };
 
@@ -562,9 +576,32 @@ const App = {
     if (State.user?.name) {
       const el = document.getElementById('my-invite-code');
       if (el && el.textContent === '------') {
-        const saved = localStorage.getItem('kiruki_my_code');
+        const saved = localStorage.getItem(State._key('my_code'));
         if (saved) el.textContent = saved;
       }
+    }
+    // リアルタイム天気をバックグラウンドで取得
+    this._loadRealWeather();
+  },
+
+  async _loadRealWeather() {
+    if (!window.WeatherAPI) return;
+    try {
+      const realData = await WeatherAPI.fetchAll();
+      let updated = false;
+      Object.entries(realData).forEach(([key, data]) => {
+        if (data && JAPAN_WEATHER[key]) {
+          Object.assign(JAPAN_WEATHER[key], data);
+          updated = true;
+        }
+      });
+      if (updated) {
+        this.initHome();
+        this.initMap();
+        this.showToast('🌤️ リアルタイム天気に更新しました');
+      }
+    } catch {
+      // サイレントフェイル: モックデータのまま継続
     }
   },
 
@@ -584,29 +621,47 @@ const App = {
 
     if (view === 'wardrobe') this.renderWardrobe();
     if (view === 'groups') this.renderGroupFeed();
+    if (view === 'profile') Profile.render();
   },
 
   refreshWeather() {
     const btn = document.querySelector('.view-header .icon-btn');
     if (btn) { btn.style.transform = 'rotate(360deg)'; btn.style.transition = 'transform 0.5s'; setTimeout(() => { btn.style.transform = ''; btn.style.transition = ''; }, 500); }
 
+    // キャッシュをクリアして最新データを取得
+    if (window.WeatherAPI) WeatherAPI.clearCache();
+
+    const afterGeo = () => {
+      if (window.WeatherAPI) {
+        WeatherAPI.fetchAll().then(realData => {
+          Object.entries(realData).forEach(([key, data]) => {
+            if (data && JAPAN_WEATHER[key]) Object.assign(JAPAN_WEATHER[key], data);
+          });
+          this.initHome();
+          this.initMap();
+          this.showToast('🌤️ 天気情報を更新しました');
+        }).catch(() => {
+          this.initHome();
+          this.showToast('天気情報を更新しました');
+        });
+      } else {
+        this.initHome();
+        this.showToast('天気情報を更新しました');
+      }
+    };
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const region = Location.findNearestRegion(pos.coords.latitude, pos.coords.longitude);
           Location.save(region, pos.coords.latitude, pos.coords.longitude);
-          this.initHome();
-          this.showToast('📍 現在地の天気に更新しました');
+          afterGeo();
         },
-        () => {
-          this.initHome();
-          this.showToast('天気情報を更新しました');
-        },
+        () => afterGeo(),
         { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
       );
     } else {
-      this.initHome();
-      this.showToast('天気情報を更新しました');
+      afterGeo();
     }
   },
 
@@ -1348,10 +1403,10 @@ const App = {
     };
     localStorage.setItem('kiruki_groups', JSON.stringify(groups));
 
-    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    const myGroups = JSON.parse(localStorage.getItem(State._key('my_groups')) || '[]');
     if (!myGroups.includes(code)) myGroups.push(code);
-    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups));
-    localStorage.setItem('kiruki_my_code', code);
+    localStorage.setItem(State._key('my_groups'), JSON.stringify(myGroups));
+    localStorage.setItem(State._key('my_code'), code);
 
     document.getElementById('my-invite-code').textContent = code;
     this.showToast(`コード発行: ${code}`);
@@ -1366,7 +1421,7 @@ const App = {
     const groups = JSON.parse(localStorage.getItem('kiruki_groups') || '{}');
     if (!groups[code]) { this.showToast('グループが見つかりません'); return; }
 
-    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    const myGroups = JSON.parse(localStorage.getItem(State._key('my_groups')) || '[]');
     if (myGroups.includes(code)) { this.showToast('既に参加しています'); return; }
 
     if (!groups[code].members.includes(State.user?.id || 'guest')) {
@@ -1374,7 +1429,7 @@ const App = {
       localStorage.setItem('kiruki_groups', JSON.stringify(groups));
     }
     myGroups.push(code);
-    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups));
+    localStorage.setItem(State._key('my_groups'), JSON.stringify(myGroups));
     input.value = '';
     this.showToast(`「${groups[code].name}」に参加しました！`);
     this.renderMyGroups();
@@ -1382,8 +1437,8 @@ const App = {
 
   leaveGroup(code) {
     if (!confirm('このグループから退出しますか？')) return;
-    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
-    localStorage.setItem('kiruki_my_groups', JSON.stringify(myGroups.filter(c => c !== code)));
+    const myGroups = JSON.parse(localStorage.getItem(State._key('my_groups')) || '[]');
+    localStorage.setItem(State._key('my_groups'), JSON.stringify(myGroups.filter(c => c !== code)));
     this.showToast('グループから退出しました');
     this.renderMyGroups();
   },
@@ -1391,7 +1446,7 @@ const App = {
   renderMyGroups() {
     const container = document.getElementById('my-groups-list');
     if (!container) return;
-    const myGroups = JSON.parse(localStorage.getItem('kiruki_my_groups') || '[]');
+    const myGroups = JSON.parse(localStorage.getItem(State._key('my_groups')) || '[]');
     const groups = JSON.parse(localStorage.getItem('kiruki_groups') || '{}');
     if (myGroups.length === 0) { container.innerHTML = ''; return; }
     container.innerHTML = myGroups.map(code => {
@@ -1425,6 +1480,117 @@ const App = {
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2200);
+  }
+};
+
+// ===== PROFILE MODULE =====
+const Profile = {
+
+  render() {
+    const u = State.user;
+    if (!u) return;
+
+    document.getElementById('profile-avatar').textContent = u.emoji || '😊';
+    document.getElementById('profile-display-name').textContent = u.name || 'ユーザー';
+    document.getElementById('profile-email').textContent = u.email || 'ゲスト（メール未登録）';
+    document.getElementById('profile-name-input').value = u.name || '';
+
+    // Stats
+    document.getElementById('stat-wardrobe').textContent = State.wardrobe.length;
+    const groups = JSON.parse(localStorage.getItem(State._key('my_groups')) || '[]');
+    document.getElementById('stat-groups').textContent = groups.length;
+
+    // 利用日数 (ユーザーIDはタイムスタンプ)
+    if (u.id && u.id !== 'guest' && !isNaN(parseInt(u.id))) {
+      const days = Math.max(1, Math.floor((Date.now() - parseInt(u.id)) / 86400000) + 1);
+      document.getElementById('stat-days').textContent = days;
+    } else {
+      document.getElementById('stat-days').textContent = '-';
+    }
+
+    // 位置情報
+    const loc = Location.load();
+    const region = loc ? Location.REGIONS[loc.region] : null;
+    document.getElementById('profile-location').textContent =
+      region ? region.label : '未設定';
+  },
+
+  startEdit() {
+    document.getElementById('profile-edit-section').style.display = 'block';
+    document.getElementById('profile-name-input').focus();
+  },
+
+  cancelEdit() {
+    document.getElementById('profile-edit-section').style.display = 'none';
+  },
+
+  saveEdit() {
+    const name = document.getElementById('profile-name-input').value.trim();
+    if (!name) return;
+    State.user.name = name;
+    // kiruki_user (現在のセッション) を更新
+    localStorage.setItem('kiruki_user', JSON.stringify(State.user));
+    // kiruki_users 一覧も更新
+    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
+    const idx = users.findIndex(u => u.id === State.user.id);
+    if (idx !== -1) {
+      users[idx] = State.user;
+      localStorage.setItem('kiruki_users', JSON.stringify(users));
+    }
+    this.cancelEdit();
+    this.render();
+    App.showToast('名前を更新しました');
+  },
+
+  pickEmoji() {
+    const EMOJIS = [
+      '😊','😎','🌸','⚡','🎯','🎨','🎮','🌊','🏔️','🌈',
+      '🦊','🐼','🦋','🌙','☀️','❄️','🔥','💎','🎵','🌟',
+      '🐶','🐱','🐸','🌺','🍀','🍭','🎸','👒','🚀','🏄'
+    ];
+    const current = State.user.emoji || '😊';
+    let pick;
+    do { pick = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]; } while (pick === current);
+    State.user.emoji = pick;
+    localStorage.setItem('kiruki_user', JSON.stringify(State.user));
+    document.getElementById('profile-avatar').textContent = pick;
+    App.showToast('アバターを変更しました');
+  },
+
+  resetLocation() {
+    if (!confirm('位置情報をリセットしますか？次回起動時に再取得できます。')) return;
+    Location.clear();
+    document.getElementById('profile-location').textContent = '未設定';
+    App.showToast('位置情報をリセットしました');
+  },
+
+  logout() {
+    if (!confirm('ログアウトしますか？')) return;
+    localStorage.removeItem('kiruki_user');
+    State.user = null;
+    State.started = false;
+
+    document.getElementById('bottom-nav').style.display = 'none';
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const authView = document.getElementById('view-auth');
+    authView.classList.remove('slide-out');
+    authView.classList.add('active');
+
+    // フォームをリセット
+    document.getElementById('auth-login-form').style.display = 'block';
+    document.getElementById('auth-register-form').style.display = 'none';
+    document.getElementById('auth-location-step').style.display = 'none';
+    const tabs = document.querySelector('.auth-tabs');
+    const divider = document.querySelector('.auth-divider');
+    const guestBtn = document.querySelector('.btn-auth-guest');
+    if (tabs) tabs.style.display = '';
+    if (divider) divider.style.display = '';
+    if (guestBtn) guestBtn.style.display = '';
+    document.querySelectorAll('.auth-tab').forEach((t, i) => {
+      if (i === 0) t.classList.add('active'); else t.classList.remove('active');
+    });
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('reg-error').textContent = '';
   }
 };
 
