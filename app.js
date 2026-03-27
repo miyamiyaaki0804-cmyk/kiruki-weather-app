@@ -535,13 +535,7 @@ const State = {
     // ユーザー別キーで保存 (旧データは共通キーからマイグレーション)
     const userKey = this._key('wardrobe');
     const saved = localStorage.getItem(userKey);
-    if (saved) {
-      this.wardrobe = JSON.parse(saved);
-    } else {
-      // 旧共通キーからのマイグレーション (初回のみ)
-      const legacy = localStorage.getItem('kiruki_wardrobe');
-      this.wardrobe = legacy ? JSON.parse(legacy) : [...SAMPLE_WARDROBE];
-    }
+    this.wardrobe = saved ? JSON.parse(saved) : [];
     // 招待コードを復元
     const code = localStorage.getItem(this._key('my_code'));
     if (code) {
