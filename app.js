@@ -263,15 +263,6 @@ const MOUNTAINS = {
 const Auth = {
   currentTab: 'login',
 
-  init() {
-    const saved = localStorage.getItem('kiruki_user');
-    if (saved) {
-      State.user = JSON.parse(saved);
-      return true;
-    }
-    return false;
-  },
-
   switchTab(tab, btn) {
     this.currentTab = tab;
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
@@ -282,40 +273,63 @@ const Auth = {
     document.getElementById('reg-error').textContent = '';
   },
 
-  register() {
+  async register() {
     const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
     const password = document.getElementById('reg-password').value;
     const errEl = document.getElementById('reg-error');
+    const btn = document.querySelector('#auth-register-form .btn-auth-submit');
     if (!name || !email || !password) { errEl.textContent = '全ての項目を入力してください'; return; }
     if (password.length < 6) { errEl.textContent = 'パスワードは6文字以上必要です'; return; }
-    if (!email.includes('@')) { errEl.textContent = '正しいメールアドレスを入力してください'; return; }
-    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
-    if (users.find(u => u.email === email)) { errEl.textContent = 'このメールは既に登録されています'; return; }
-    const user = { name, email, password, id: Date.now().toString(), emoji: '😊' };
-    users.push(user);
-    localStorage.setItem('kiruki_users', JSON.stringify(users));
-    localStorage.setItem('kiruki_user', JSON.stringify(user));
-    State.user = user;
-    // 新規登録は必ず位置情報ステップへ
-    this.showLocationStep();
+    btn.disabled = true; btn.textContent = '登録中...';
+    try {
+      const cred = await fbAuth.createUserWithEmailAndPassword(email, password);
+      await cred.user.updateProfile({ displayName: name });
+      const profile = { name, email, emoji: '😊', createdAt: Date.now() };
+      await fbDb.ref(`users/${cred.user.uid}/profile`).set(profile);
+      State.user = { id: cred.user.uid, email, name, emoji: '😊' };
+      this.showLocationStep();
+    } catch (e) {
+      errEl.textContent = {
+        'auth/email-already-in-use': 'このメールは既に登録されています',
+        'auth/weak-password': 'パスワードは6文字以上必要です',
+        'auth/invalid-email': 'メールアドレスの形式が正しくありません',
+      }[e.code] || '登録に失敗しました。もう一度お試しください';
+      btn.disabled = false; btn.textContent = '登録する →';
+    }
   },
 
-  login() {
-    const email = document.getElementById('login-email').value.trim();
+  async login() {
+    const email = document.getElementById('login-email').value.trim().toLowerCase();
     const password = document.getElementById('login-password').value;
     const errEl = document.getElementById('login-error');
+    const btn = document.querySelector('#auth-login-form .btn-auth-submit');
     if (!email || !password) { errEl.textContent = 'メールとパスワードを入力してください'; return; }
-    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) { errEl.textContent = 'メールアドレスまたはパスワードが違います'; return; }
-    localStorage.setItem('kiruki_user', JSON.stringify(user));
-    State.user = user;
-    // ログイン済みで位置情報未取得なら聞く
-    if (!Location.load()) {
-      this.showLocationStep();
-    } else {
-      App.launchApp();
+    btn.disabled = true; btn.textContent = 'ログイン中...';
+    try {
+      const cred = await fbAuth.signInWithEmailAndPassword(email, password);
+      const snap = await fbDb.ref(`users/${cred.user.uid}/profile`).once('value');
+      const profile = snap.val() || {};
+      State.user = {
+        id: cred.user.uid,
+        email: cred.user.email,
+        name: profile.name || cred.user.displayName || 'ユーザー',
+        emoji: profile.emoji || '😊',
+      };
+      if (!Location.load()) {
+        this.showLocationStep();
+      } else {
+        App.launchApp();
+      }
+    } catch (e) {
+      errEl.textContent = {
+        'auth/user-not-found': 'メールアドレスが登録されていません',
+        'auth/wrong-password': 'パスワードが違います',
+        'auth/invalid-credential': 'メールアドレスまたはパスワードが違います',
+        'auth/too-many-requests': 'しばらく時間をおいてから再試行してください',
+        'auth/invalid-email': 'メールアドレスの形式が正しくありません',
+      }[e.code] || 'ログインに失敗しました。もう一度お試しください';
+      btn.disabled = false; btn.textContent = 'ログイン →';
     }
   },
 
@@ -531,11 +545,22 @@ const State = {
     return `kiruki_${base}_${uid}`;
   },
 
-  init() {
-    // ユーザー別キーで保存 (旧データは共通キーからマイグレーション)
-    const userKey = this._key('wardrobe');
-    const saved = localStorage.getItem(userKey);
-    this.wardrobe = saved ? JSON.parse(saved) : [];
+  async init() {
+    if (!State.user?.id || State.user.id === 'guest') {
+      this.wardrobe = [];
+      return;
+    }
+    try {
+      const snap = await fbDb.ref(`users/${State.user.id}/wardrobe`).once('value');
+      const data = snap.val();
+      this.wardrobe = data
+        ? Object.values(data).sort((a, b) => b.date.localeCompare(a.date))
+        : [];
+    } catch {
+      // Fallback: localStorage
+      const saved = localStorage.getItem(this._key('wardrobe'));
+      this.wardrobe = saved ? JSON.parse(saved) : [];
+    }
     // 招待コードを復元
     const code = localStorage.getItem(this._key('my_code'));
     if (code) {
@@ -545,7 +570,14 @@ const State = {
   },
 
   saveWardrobe() {
+    // localStorage にキャッシュ
     localStorage.setItem(this._key('wardrobe'), JSON.stringify(this.wardrobe));
+    // Firebase Realtime Database に永続化（fire and forget）
+    if (State.user?.id && State.user.id !== 'guest') {
+      const obj = {};
+      this.wardrobe.forEach(item => { obj[item.id] = item; });
+      fbDb.ref(`users/${State.user.id}/wardrobe`).set(obj).catch(() => {});
+    }
   }
 };
 
@@ -557,9 +589,9 @@ const App = {
     document.getElementById('view-auth').classList.add('active');
   },
 
-  launchApp() {
+  async launchApp() {
     State.started = true;
-    State.init();
+    await State.init();
     document.getElementById('view-auth').classList.remove('active');
     document.getElementById('view-auth').classList.add('slide-out');
     document.getElementById('bottom-nav').style.display = 'flex';
@@ -1522,14 +1554,8 @@ const Profile = {
     const name = document.getElementById('profile-name-input').value.trim();
     if (!name) return;
     State.user.name = name;
-    // kiruki_user (現在のセッション) を更新
-    localStorage.setItem('kiruki_user', JSON.stringify(State.user));
-    // kiruki_users 一覧も更新
-    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
-    const idx = users.findIndex(u => u.id === State.user.id);
-    if (idx !== -1) {
-      users[idx] = State.user;
-      localStorage.setItem('kiruki_users', JSON.stringify(users));
+    if (State.user?.id && State.user.id !== 'guest') {
+      fbDb.ref(`users/${State.user.id}/profile/name`).set(name).catch(() => {});
     }
     this.cancelEdit();
     this.render();
@@ -1546,8 +1572,10 @@ const Profile = {
     let pick;
     do { pick = EMOJIS[Math.floor(Math.random() * EMOJIS.length)]; } while (pick === current);
     State.user.emoji = pick;
-    localStorage.setItem('kiruki_user', JSON.stringify(State.user));
     document.getElementById('profile-avatar').textContent = pick;
+    if (State.user?.id && State.user.id !== 'guest') {
+      fbDb.ref(`users/${State.user.id}/profile/emoji`).set(pick).catch(() => {});
+    }
     App.showToast('アバターを変更しました');
   },
 
@@ -1558,22 +1586,19 @@ const Profile = {
     App.showToast('位置情報をリセットしました');
   },
 
-  deleteAccount() {
+  async deleteAccount() {
     const u = State.user;
     if (!u || u.id === 'guest') { App.showToast('ゲストはアカウント削除できません'); return; }
     if (!confirm('本当にアカウントを削除しますか？\nコーデ記録・グループなどすべてのデータが削除されます。')) return;
     if (!confirm('もう一度確認します。この操作は取り消せません。\n削除しますか？')) return;
-
-    // ユーザー別データを全削除
+    try {
+      await fbDb.ref(`users/${u.id}`).remove();
+      const firebaseUser = fbAuth.currentUser;
+      if (firebaseUser) await firebaseUser.delete();
+    } catch {}
     localStorage.removeItem(State._key('wardrobe'));
     localStorage.removeItem(State._key('my_code'));
     localStorage.removeItem(State._key('my_groups'));
-    localStorage.removeItem('kiruki_user');
-
-    // kiruki_users 一覧からも削除
-    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
-    localStorage.setItem('kiruki_users', JSON.stringify(users.filter(x => x.id !== u.id)));
-
     State.user = null;
     State.wardrobe = [];
     State.started = false;
@@ -1583,7 +1608,7 @@ const Profile = {
 
   logout() {
     if (!confirm('ログアウトしますか？')) return;
-    localStorage.removeItem('kiruki_user');
+    fbAuth.signOut().catch(() => {});
     State.user = null;
     State.started = false;
     this._goToAuth();
@@ -1633,9 +1658,19 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Auto-login returning user (skip intro + auth)
-  if (Auth.init()) {
-    document.getElementById('view-intro').classList.add('hidden');
-    App.launchApp();
-  }
+  // Firebase Auth state で自動ログイン判定
+  fbAuth.onAuthStateChanged(async (firebaseUser) => {
+    if (firebaseUser && !State.started) {
+      const snap = await fbDb.ref(`users/${firebaseUser.uid}/profile`).once('value');
+      const profile = snap.val() || {};
+      State.user = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: profile.name || firebaseUser.displayName || 'ユーザー',
+        emoji: profile.emoji || '😊',
+      };
+      document.getElementById('view-intro').classList.add('hidden');
+      App.launchApp();
+    }
+  });
 });
