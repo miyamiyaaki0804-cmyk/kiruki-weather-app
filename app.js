@@ -1564,19 +1564,43 @@ const Profile = {
     App.showToast('位置情報をリセットしました');
   },
 
+  deleteAccount() {
+    const u = State.user;
+    if (!u || u.id === 'guest') { App.showToast('ゲストはアカウント削除できません'); return; }
+    if (!confirm('本当にアカウントを削除しますか？\nコーデ記録・グループなどすべてのデータが削除されます。')) return;
+    if (!confirm('もう一度確認します。この操作は取り消せません。\n削除しますか？')) return;
+
+    // ユーザー別データを全削除
+    localStorage.removeItem(State._key('wardrobe'));
+    localStorage.removeItem(State._key('my_code'));
+    localStorage.removeItem(State._key('my_groups'));
+    localStorage.removeItem('kiruki_user');
+
+    // kiruki_users 一覧からも削除
+    const users = JSON.parse(localStorage.getItem('kiruki_users') || '[]');
+    localStorage.setItem('kiruki_users', JSON.stringify(users.filter(x => x.id !== u.id)));
+
+    State.user = null;
+    State.wardrobe = [];
+    State.started = false;
+    this._goToAuth();
+    App.showToast('アカウントを削除しました');
+  },
+
   logout() {
     if (!confirm('ログアウトしますか？')) return;
     localStorage.removeItem('kiruki_user');
     State.user = null;
     State.started = false;
+    this._goToAuth();
+  },
 
+  _goToAuth() {
     document.getElementById('bottom-nav').style.display = 'none';
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const authView = document.getElementById('view-auth');
     authView.classList.remove('slide-out');
     authView.classList.add('active');
-
-    // フォームをリセット
     document.getElementById('auth-login-form').style.display = 'block';
     document.getElementById('auth-register-form').style.display = 'none';
     document.getElementById('auth-location-step').style.display = 'none';

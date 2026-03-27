@@ -1803,6 +1803,25 @@ html, body {
 }
 .btn-logout:active { background: #FECACA; }
 
+.profile-danger-zone {
+  border: 1.5px solid #FECACA;
+  background: #FFF5F5;
+}
+.btn-delete-account {
+  width: 100%;
+  background: #DC2626;
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.btn-delete-account:active { background: #B91C1C; }
+
 .code-hint {
   text-align: center;
   font-size: 0.72rem;
