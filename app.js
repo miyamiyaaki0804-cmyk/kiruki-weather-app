@@ -763,6 +763,28 @@ const App = {
 
     // Similar day
     this.showSimilarDay(w.temp);
+
+    // Past outfits (近い気温のコーデ一覧)
+    this.renderHomePastOutfits(w.temp);
+  },
+
+  renderHomePastOutfits(temp) {
+    const section = document.getElementById('home-past-outfits');
+    const scroll  = document.getElementById('home-past-scroll');
+    if (!section || !scroll) return;
+    const similar = State.wardrobe.filter(i => Math.abs(i.temp - temp) <= 4).slice(0, 10);
+    if (similar.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    scroll.innerHTML = similar.map(item => `
+      <div class="hpo-card" onclick="App.showWardrobeItem(${item.id})">
+        ${item.photo
+          ? `<img src="${item.photo}" class="hpo-img" alt="コーデ">`
+          : `<div class="hpo-emoji">${item.emoji || '👕'}</div>`}
+        <div class="hpo-date">${item.date ? item.date.replace(/\d{4}年/, '') : ''}</div>
+        <div class="hpo-temp">${item.icon || '🌡️'} ${item.temp}°</div>
+        <div class="hpo-outfit">${(item.outfit || '').slice(0, 18)}${(item.outfit || '').length > 18 ? '…' : ''}</div>
+      </div>
+    `).join('');
   },
 
   showDayPlan(d, dayIndex) {
@@ -1060,6 +1082,26 @@ const App = {
         <div style="font-size:0.82rem;color:var(--text-sub);margin-bottom:8px">${ai.comment}</div>
         ${w.outfit.map(o => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.85rem">${o}</div>`).join('')}
       </div>
+
+      ${(() => {
+        const similar = State.wardrobe.filter(i => Math.abs(i.temp - w.temp) <= 4).slice(0, 5);
+        if (similar.length === 0) return '';
+        return `
+          <div class="region-outfit-section" style="margin-top:14px">
+            <h4>🗂️ あなたの過去のコーデ（気温が近い日）</h4>
+            ${similar.map(item => `
+              <div class="region-past-row" onclick="App.showWardrobeItem(${item.id})">
+                ${item.photo
+                  ? `<img src="${item.photo}" class="rpr-photo" alt="コーデ">`
+                  : `<div class="rpr-emoji">${item.emoji || '👕'}</div>`}
+                <div class="rpr-info">
+                  <div class="rpr-date">${item.date} · ${item.icon || '🌡️'} ${item.temp}°C</div>
+                  <div class="rpr-outfit">${(item.outfit || '（記録なし）').slice(0, 40)}${(item.outfit || '').length > 40 ? '…' : ''}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>`;
+      })()}
     `;
 
     this.openModal('modal-region');
@@ -1624,6 +1666,32 @@ const Profile = {
     State.user = null;
     State.started = false;
     this._goToAuth();
+  },
+
+  showTerms() {
+    document.getElementById('modal-terms').classList.add('open');
+  },
+  closeTerms(e) {
+    if (!e || e.target === document.getElementById('modal-terms')) {
+      document.getElementById('modal-terms').classList.remove('open');
+    }
+  },
+
+  showGuide() {
+    document.getElementById('modal-guide').classList.add('open');
+  },
+  closeGuide(e) {
+    if (!e || e.target === document.getElementById('modal-guide')) {
+      document.getElementById('modal-guide').classList.remove('open');
+    }
+  },
+  showPrivacy() {
+    document.getElementById('modal-privacy').classList.add('open');
+  },
+  closePrivacy(e) {
+    if (!e || e.target === document.getElementById('modal-privacy')) {
+      document.getElementById('modal-privacy').classList.remove('open');
+    }
   },
 
   _goToAuth() {

@@ -1828,3 +1828,225 @@ html, body {
   color: var(--text-sub);
   padding: 4px 0 10px;
 }
+
+/* ===== HOME PAST OUTFITS ===== */
+.home-past-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 4px 10px;
+  scrollbar-width: none;
+}
+.home-past-scroll::-webkit-scrollbar { display: none; }
+
+.hpo-card {
+  flex: 0 0 110px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.hpo-card:active { transform: scale(0.96); }
+.hpo-img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+.hpo-emoji {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #E0E9FF, #C7D7F7);
+}
+.hpo-date {
+  font-size: 0.68rem;
+  color: var(--text-sub);
+  padding: 5px 7px 0;
+}
+.hpo-temp {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  padding: 1px 7px;
+}
+.hpo-outfit {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  padding: 2px 7px 7px;
+  line-height: 1.3;
+}
+
+/* ===== MAP MODAL PAST OUTFITS ===== */
+.region-past-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.region-past-row:active { background: #F0F4FF; }
+.rpr-photo {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.rpr-emoji {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #E0E9FF, #C7D7F7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.rpr-info { flex: 1; min-width: 0; }
+.rpr-date {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  margin-bottom: 2px;
+}
+.rpr-outfit {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* ===== INFO / GUIDE / PRIVACY MODALS ===== */
+.btn-profile-info {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-profile-info:active { background: #E8EFFF; }
+
+.info-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1000;
+  align-items: flex-end;
+  justify-content: center;
+}
+.info-modal-overlay.open {
+  display: flex;
+}
+.info-modal {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.info-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.info-modal-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.info-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--text-sub);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.info-modal-close:active { background: var(--border); }
+.info-modal-body {
+  overflow-y: auto;
+  padding: 16px 20px 32px;
+  flex: 1;
+}
+
+/* Guide */
+.guide-section {
+  margin-bottom: 20px;
+}
+.guide-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+.guide-list {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.guide-list li {
+  font-size: 0.88rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+/* Privacy */
+.privacy-updated {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+}
+.privacy-section {
+  margin-bottom: 20px;
+}
+.privacy-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.privacy-text {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.privacy-list {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.privacy-list li {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+}

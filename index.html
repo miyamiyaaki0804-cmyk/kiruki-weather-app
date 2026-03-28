@@ -214,6 +214,12 @@
     <div id="similar-day-card" class="similar-card"></div>
   </div>
 
+  <!-- Past Outfits -->
+  <div id="home-past-outfits" style="display:none">
+    <div class="section-title">🗂️ 近い気温で着た服</div>
+    <div id="home-past-scroll" class="home-past-scroll"></div>
+  </div>
+
   <button class="btn-log-outfit" onclick="App.showLogOutfit()">📸 今日のコーデを記録</button>
 </div>
 
@@ -573,7 +579,17 @@
     <div class="profile-section">
       <div class="profile-section-title">ℹ️ データについて</div>
       <div class="profile-note">
-        データはこのブラウザ（localStorage）に保存されています。ブラウザのキャッシュを削除するとデータが失われます。異なるデバイス・ブラウザ間での同期には対応していません。
+        アカウントデータはFirebase（Google）のクラウドに保存されます。コーデ写真はこのブラウザに保存されます。
+      </div>
+    </div>
+
+    <!-- 使い方・プライバシーポリシー -->
+    <div class="profile-section">
+      <div class="profile-section-title">📋 サポート</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn-profile-info" onclick="Profile.showGuide()">📖 使い方・機能一覧</button>
+        <button class="btn-profile-info" onclick="Profile.showTerms()">📄 利用規約</button>
+        <button class="btn-profile-info" onclick="Profile.showPrivacy()">🔒 プライバシーポリシー</button>
       </div>
     </div>
 
@@ -589,6 +605,224 @@
       <button class="btn-delete-account" onclick="Profile.deleteAccount()">🗑️ アカウントを削除する</button>
     </div>
 
+  </div>
+</div>
+
+<!-- ==================== GUIDE MODAL ==================== -->
+<div id="modal-guide" class="info-modal-overlay" onclick="Profile.closeGuide(event)">
+  <div class="info-modal">
+    <div class="info-modal-header">
+      <h3>📖 使い方・機能一覧</h3>
+      <button class="info-modal-close" onclick="Profile.closeGuide()">✕</button>
+    </div>
+    <div class="info-modal-body">
+      <div class="guide-section">
+        <div class="guide-section-title">🏠 ホーム</div>
+        <ul class="guide-list">
+          <li>今日の天気と気温に合わせたAI服装提案を表示</li>
+          <li>朝・昼・夜の気温変化を考慮した一日を通しての服装提案</li>
+          <li>位置情報を使ってあなたのいる場所の天気を自動取得</li>
+          <li>7日間の天気予報をタップして各日の服装を確認</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <div class="guide-section-title">🗾 全国地図</div>
+        <ul class="guide-list">
+          <li>日本各地域の現在気温をマップ上で一覧表示</li>
+          <li>地域をタップするとその地域の詳しい天気と服装提案を確認</li>
+          <li>気温に応じて色分け表示（青=寒い / 赤=暑い）</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <div class="guide-section-title">👗 コーデ記録</div>
+        <ul class="guide-list">
+          <li>今日の服装を写真で記録・保存</li>
+          <li>スケジュールタグ（大学・バイト・休日など）を付けて管理</li>
+          <li>体感メモ（暑かった・ちょうどよかったなど）を記録</li>
+          <li>過去の記録から似た気温の日のコーデを参考に</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <div class="guide-section-title">👥 グループ</div>
+        <ul class="guide-list">
+          <li>招待コードで友達とグループを作成</li>
+          <li>グループ内でお互いの今日のコーデを共有</li>
+          <li>全国フィードで色々な人のコーデを閲覧</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <div class="guide-section-title">👤 マイページ</div>
+        <ul class="guide-list">
+          <li>プロフィール名・アバター絵文字を変更</li>
+          <li>登録済み位置情報のリセット</li>
+          <li>コーデ記録数・グループ数・利用日数を確認</li>
+          <li>アカウントの削除</li>
+        </ul>
+      </div>
+      <div class="guide-section">
+        <div class="guide-section-title">💡 ヒント</div>
+        <ul class="guide-list">
+          <li>位置情報を許可すると天気の精度が大幅に向上します</li>
+          <li>コーデ記録を続けると過去の参考データが増えていきます</li>
+          <li>スケジュールタグで場面別の服装管理ができます</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TERMS MODAL ==================== -->
+<div id="modal-terms" class="info-modal-overlay" onclick="Profile.closeTerms(event)">
+  <div class="info-modal">
+    <div class="info-modal-header">
+      <h3>📄 利用規約</h3>
+      <button class="info-modal-close" onclick="Profile.closeTerms()">✕</button>
+    </div>
+    <div class="info-modal-body">
+      <p class="privacy-updated">最終更新日：2025年3月</p>
+      <p class="privacy-text">本利用規約（以下「本規約」）は、KiruKi（着る気象アプリ、以下「本サービス」）の利用に関する条件を定めるものです。本サービスをご利用になることで、本規約に同意したものとみなします。</p>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第1条 サービスについて</div>
+        <p class="privacy-text">本サービスは、気象情報をもとにAIが服装を提案するウェブアプリケーションです。天気情報の取得・服装記録・グループ機能などを提供します。サービスの内容は予告なく変更・追加・削除される場合があります。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第2条 アカウント登録について</div>
+        <ul class="privacy-list">
+          <li>登録情報（氏名・メールアドレス等）は正確な情報を入力してください。虚偽の情報による登録は禁止します。</li>
+          <li>パスワードはご自身の責任で厳重に管理してください。第三者へのパスワード開示・共有は禁止します。</li>
+          <li>アカウントは一人につき一つとします。複数アカウントの作成は禁止します。</li>
+          <li>アカウントの不正利用を発見した場合は速やかにパスワードを変更し、当方へご連絡ください。</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第3条 禁止事項</div>
+        <p class="privacy-text">利用者は以下の行為を行ってはなりません：</p>
+        <ul class="privacy-list">
+          <li>他のユーザーへの迷惑行為・嫌がらせ・誹謗中傷</li>
+          <li>本サービスへの不正アクセス・システムへの攻撃・改ざん</li>
+          <li>法令または公序良俗に反する行為</li>
+          <li>本サービスを通じた商業目的の宣伝・勧誘行為</li>
+          <li>他者の知的財産権・プライバシーを侵害する行為</li>
+          <li>虚偽の情報の投稿・拡散</li>
+          <li>その他、当方が不適切と判断する行為</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第4条 免責事項</div>
+        <ul class="privacy-list">
+          <li>本サービスが提供する天気情報・服装提案の正確性・完全性を保証するものではありません。</li>
+          <li>利用者がコーデ記録・メモ等に入力・保存したデータの内容に対して、当方は一切の責任を負いません。</li>
+          <li>通信障害・システム障害・第三者サービス（Firebase等）の障害により生じた損害について、当方は責任を負いません。</li>
+          <li>本サービスの利用によって生じた損害（直接・間接を問わず）について、当方は一切の責任を負いません。</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第5条 知的財産権</div>
+        <p class="privacy-text">本サービスに関するプログラム・デザイン・文章・画像等の著作権その他の知的財産権は、当方または正当な権利者に帰属します。利用者は、本サービスのコンテンツを当方の許可なく複製・転載・改変・販売等することはできません。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第6条 サービスの変更・停止</div>
+        <p class="privacy-text">当方は、事前の通知なく本サービスの内容を変更、または提供を一時停止・終了することがあります。これにより利用者に損害が生じた場合でも、当方は一切の責任を負いません。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第7条 規約の変更</div>
+        <p class="privacy-text">当方は本規約を予告なく変更することがあります。変更後の規約はアプリ内に掲載された時点で効力を生じ、利用者が本サービスを継続して利用することで変更後の規約に同意したものとみなします。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第8条 禁止事項違反への対応</div>
+        <p class="privacy-text">第3条に定める禁止事項またはその他本規約に違反する行為が確認された場合、当方は予告なく当該利用者のアカウントを停止・削除する権限を有します。これにより利用者に損害が生じた場合でも、当方は一切の責任を負いません。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">第9条 準拠法・管轄裁判所</div>
+        <p class="privacy-text">本規約は日本法に基づき解釈されます。本サービスに関して生じた紛争については、当方所在地を管轄する日本の裁判所を第一審の専属的合意管轄裁判所とします。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PRIVACY MODAL ==================== -->
+<div id="modal-privacy" class="info-modal-overlay" onclick="Profile.closePrivacy(event)">
+  <div class="info-modal">
+    <div class="info-modal-header">
+      <h3>🔒 プライバシーポリシー</h3>
+      <button class="info-modal-close" onclick="Profile.closePrivacy()">✕</button>
+    </div>
+    <div class="info-modal-body">
+      <p class="privacy-updated">最終更新日：2025年3月</p>
+
+      <div class="privacy-section">
+        <div class="privacy-title">1. 事業者情報</div>
+        <p class="privacy-text">本アプリ「KiruKi（着る気象アプリ）」は個人が開発・運営するウェブアプリケーションです。お問い合わせはアプリ内のグループ機能またはご登録のメールアドレスにてご連絡ください。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">2. 収集する情報</div>
+        <p class="privacy-text">本アプリは以下の情報を収集する場合があります：</p>
+        <ul class="privacy-list">
+          <li><strong>メールアドレス・パスワード</strong>：アカウント認証のため。パスワードはFirebase Authenticationにより暗号化して管理され、当方が直接参照することはありません。</li>
+          <li><strong>プロフィール情報</strong>：表示名・アバター絵文字。</li>
+          <li><strong>位置情報</strong>：天気情報の取得に使用。ユーザーの許可を得た場合のみ収集します。</li>
+          <li><strong>服装の写真・メモ</strong>：コーデ記録機能利用時に、お使いのブラウザ内（localStorage）に保存されます。</li>
+          <li><strong>IPアドレス・ブラウザ情報</strong>：不正アクセス防止のため、Firebaseのサーバーログとして自動記録される場合があります（当方による直接収集はありません）。</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">3. 情報の利用目的</div>
+        <ul class="privacy-list">
+          <li>アカウントの作成・認証・管理</li>
+          <li>天気情報・服装提案の提供</li>
+          <li>グループ機能によるコーデ共有</li>
+          <li>不正利用・スパムの防止</li>
+          <li>アプリの品質向上・障害対応</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">4. 第三者提供・外部サービス</div>
+        <p class="privacy-text">本アプリは以下の外部サービスを使用しています。各サービスのプライバシーポリシーもご確認ください：</p>
+        <ul class="privacy-list">
+          <li><strong>Firebase（Google LLC）</strong>：アカウント認証・データ保存に使用。データはGoogleのサーバー（シンガポール等）に保存されます。</li>
+          <li><strong>Open-Meteo</strong>：天気データの取得に使用。位置情報（緯度・経度）をリクエスト時に送信します。ユーザーの特定は行われません。</li>
+          <li><strong>国土地理院（dataofjapan/land）</strong>：地図データの表示に使用。</li>
+        </ul>
+        <p class="privacy-text">上記以外の第三者にお客様の個人情報を提供することはありません。ただし法令に基づく場合はこの限りではありません。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">5. データの保管・セキュリティ</div>
+        <ul class="privacy-list">
+          <li>アカウント情報はFirebase（Google）のサーバーにSSL/TLS暗号化通信で送受信・保存されます。</li>
+          <li>コーデ写真・ローカルデータはお使いのブラウザのlocalStorageに保存され、外部には送信されません。</li>
+          <li>Firebaseのセキュリティルールにより、各ユーザーは自分のデータのみアクセス可能です。</li>
+          <li>完全なセキュリティを保証するものではありませんが、業界標準に準じた対策を実施しています。</li>
+        </ul>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">6. データの削除</div>
+        <p class="privacy-text">マイページの「アカウントを削除する」からいつでもアカウントおよびFirebaseに保存された全データを削除できます。ブラウザのlocalStorageに保存されたデータ（コーデ写真等）はブラウザの設定から削除してください。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">7. Cookieについて</div>
+        <p class="privacy-text">本アプリはFirebase Authenticationのセッション管理のためにCookieを使用しています。このCookieはログイン状態の維持のみに使用され、広告目的では使用されません。ブラウザの設定でCookieを無効にするとログイン機能が正常に動作しない場合があります。</p>
+      </div>
+
+      <div class="privacy-section">
+        <div class="privacy-title">8. ポリシーの変更</div>
+        <p class="privacy-text">本プライバシーポリシーは、法令の改正・サービス内容の変更等により、予告なく変更される場合があります。変更後のポリシーはアプリ内に掲載した時点で効力を生じるものとします。重要な変更がある場合は可能な範囲でお知らせします。</p>
+      </div>
+    </div>
   </div>
 </div>
 
