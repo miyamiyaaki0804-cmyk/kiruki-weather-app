@@ -467,10 +467,11 @@
     <button class="icon-btn" onclick="App.showLogOutfit()">＋</button>
   </div>
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="App.filterWardrobe('cold', this)">🧊 寒い日</button>
+    <button class="filter-btn active" onclick="App.filterWardrobe('all', this)">📋 すべて</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('cold', this)">🧊 寒い日</button>
     <button class="filter-btn" onclick="App.filterWardrobe('cool', this)">🍃 涼しい日</button>
     <button class="filter-btn" onclick="App.filterWardrobe('warm', this)">🌸 暖かい日</button>
-    <button class="filter-btn" onclick="App.filterWardrobe('hot', this)">☀️ 暑い日</button>
+    <button class="filter-btn" onclick="App.filterWardrobe('hot', this)">☀️ 熱い日</button>
   </div>
   <div class="wardrobe-grid" id="wardrobe-grid">
     <!-- Populated by JS -->

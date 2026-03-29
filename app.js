@@ -533,7 +533,7 @@ const State = {
   started: false,
   currentView: 'home',
   currentGroup: 'personal',
-  wardrobeFilter: 'cold',
+  wardrobeFilter: 'all',
   selectedFeeling: null,
   photoDataUrl: null,
   wardrobe: [],
@@ -1119,10 +1119,11 @@ const App = {
     const allItems = [...State.wardrobe];
     let items = allItems;
 
-    if (filter === 'cold') items = allItems.filter(i => i.temp < 8);
-    else if (filter === 'cool') items = allItems.filter(i => i.temp >= 8 && i.temp < 15);
-    else if (filter === 'warm') items = allItems.filter(i => i.temp >= 15 && i.temp < 22);
-    else if (filter === 'hot') items = allItems.filter(i => i.temp >= 22);
+    if (filter === 'cold') items = allItems.filter(i => i.feeling === 'too-cold' || i.feeling === 'cold');
+    else if (filter === 'cool') items = allItems.filter(i => i.feeling === 'perfect');
+    else if (filter === 'warm') items = allItems.filter(i => i.feeling === 'warm');
+    else if (filter === 'hot') items = allItems.filter(i => i.feeling === 'too-hot');
+    // 'all' はフィルターなし
 
     // If current filter has no items, show all
     if (items.length === 0 && allItems.length > 0) items = allItems;
