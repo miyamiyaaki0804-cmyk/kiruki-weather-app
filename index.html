@@ -587,9 +587,9 @@
     <div class="profile-section">
       <div class="profile-section-title">📋 サポート</div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-profile-info" onclick="Profile.showGuide()">📖 使い方・機能一覧</button>
-        <button class="btn-profile-info" onclick="Profile.showTerms()">📄 利用規約</button>
-        <button class="btn-profile-info" onclick="Profile.showPrivacy()">🔒 プライバシーポリシー</button>
+        <button class="btn-profile-info" onclick="Profile.openInfoModal('modal-guide')">📖 使い方・機能一覧</button>
+        <button class="btn-profile-info" onclick="Profile.openInfoModal('modal-terms')">📄 利用規約</button>
+        <button class="btn-profile-info" onclick="Profile.openInfoModal('modal-privacy')">🔒 プライバシーポリシー</button>
       </div>
     </div>
 
@@ -609,11 +609,11 @@
 </div>
 
 <!-- ==================== GUIDE MODAL ==================== -->
-<div id="modal-guide" class="info-modal-overlay" onclick="Profile.closeGuide(event)">
+<div id="modal-guide" class="info-modal-overlay" onclick="Profile.closeInfoModal('modal-guide', event)">
   <div class="info-modal">
     <div class="info-modal-header">
       <h3>📖 使い方・機能一覧</h3>
-      <button class="info-modal-close" onclick="Profile.closeGuide()">✕</button>
+      <button class="info-modal-close" onclick="Profile.closeInfoModal('modal-guide')">✕</button>
     </div>
     <div class="info-modal-body">
       <div class="guide-section">
@@ -672,11 +672,11 @@
 </div>
 
 <!-- ==================== TERMS MODAL ==================== -->
-<div id="modal-terms" class="info-modal-overlay" onclick="Profile.closeTerms(event)">
+<div id="modal-terms" class="info-modal-overlay" onclick="Profile.closeInfoModal('modal-terms', event)">
   <div class="info-modal">
     <div class="info-modal-header">
       <h3>📄 利用規約</h3>
-      <button class="info-modal-close" onclick="Profile.closeTerms()">✕</button>
+      <button class="info-modal-close" onclick="Profile.closeInfoModal('modal-terms')">✕</button>
     </div>
     <div class="info-modal-body">
       <p class="privacy-updated">最終更新日：2025年3月</p>
@@ -750,11 +750,11 @@
 </div>
 
 <!-- ==================== PRIVACY MODAL ==================== -->
-<div id="modal-privacy" class="info-modal-overlay" onclick="Profile.closePrivacy(event)">
+<div id="modal-privacy" class="info-modal-overlay" onclick="Profile.closeInfoModal('modal-privacy', event)">
   <div class="info-modal">
     <div class="info-modal-header">
       <h3>🔒 プライバシーポリシー</h3>
-      <button class="info-modal-close" onclick="Profile.closePrivacy()">✕</button>
+      <button class="info-modal-close" onclick="Profile.closeInfoModal('modal-privacy')">✕</button>
     </div>
     <div class="info-modal-body">
       <p class="privacy-updated">最終更新日：2025年3月</p>

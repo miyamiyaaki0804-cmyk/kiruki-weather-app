@@ -768,11 +768,15 @@ const App = {
     this.renderHomePastOutfits(w.temp);
   },
 
+  _similarOutfits(temp, limit) {
+    return State.wardrobe.filter(i => Math.abs(i.temp - temp) <= 4).slice(0, limit);
+  },
+
   renderHomePastOutfits(temp) {
     const section = document.getElementById('home-past-outfits');
     const scroll  = document.getElementById('home-past-scroll');
     if (!section || !scroll) return;
-    const similar = State.wardrobe.filter(i => Math.abs(i.temp - temp) <= 4).slice(0, 10);
+    const similar = this._similarOutfits(temp, 10);
     if (similar.length === 0) { section.style.display = 'none'; return; }
     section.style.display = '';
     scroll.innerHTML = similar.map(item => `
@@ -1083,28 +1087,30 @@ const App = {
         ${w.outfit.map(o => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.85rem">${o}</div>`).join('')}
       </div>
 
-      ${(() => {
-        const similar = State.wardrobe.filter(i => Math.abs(i.temp - w.temp) <= 4).slice(0, 5);
-        if (similar.length === 0) return '';
-        return `
-          <div class="region-outfit-section" style="margin-top:14px">
-            <h4>🗂️ あなたの過去のコーデ（気温が近い日）</h4>
-            ${similar.map(item => `
-              <div class="region-past-row" onclick="App.showWardrobeItem(${item.id})">
-                ${item.photo
-                  ? `<img src="${item.photo}" class="rpr-photo" alt="コーデ">`
-                  : `<div class="rpr-emoji">${item.emoji || '👕'}</div>`}
-                <div class="rpr-info">
-                  <div class="rpr-date">${item.date} · ${item.icon || '🌡️'} ${item.temp}°C</div>
-                  <div class="rpr-outfit">${(item.outfit || '（記録なし）').slice(0, 40)}${(item.outfit || '').length > 40 ? '…' : ''}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>`;
-      })()}
+      ${this._renderRegionPastOutfits(w.temp)}
     `;
 
     this.openModal('modal-region');
+  },
+
+  _renderRegionPastOutfits(temp) {
+    const similar = this._similarOutfits(temp, 5);
+    if (similar.length === 0) return '';
+    return `
+      <div class="region-outfit-section" style="margin-top:14px">
+        <h4>🗂️ あなたの過去のコーデ（気温が近い日）</h4>
+        ${similar.map(item => `
+          <div class="region-past-row" onclick="App.showWardrobeItem(${item.id})">
+            ${item.photo
+              ? `<img src="${item.photo}" class="rpr-photo" alt="コーデ">`
+              : `<div class="rpr-emoji">${item.emoji || '👕'}</div>`}
+            <div class="rpr-info">
+              <div class="rpr-date">${item.date} · ${item.icon || '🌡️'} ${item.temp}°C</div>
+              <div class="rpr-outfit">${(item.outfit || '（記録なし）').slice(0, 40)}${(item.outfit || '').length > 40 ? '…' : ''}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>`;
   },
 
   // ===== WARDROBE =====
@@ -1668,30 +1674,12 @@ const Profile = {
     this._goToAuth();
   },
 
-  showTerms() {
-    document.getElementById('modal-terms').classList.add('open');
+  openInfoModal(id) {
+    document.getElementById(id).classList.add('open');
   },
-  closeTerms(e) {
-    if (!e || e.target === document.getElementById('modal-terms')) {
-      document.getElementById('modal-terms').classList.remove('open');
-    }
-  },
-
-  showGuide() {
-    document.getElementById('modal-guide').classList.add('open');
-  },
-  closeGuide(e) {
-    if (!e || e.target === document.getElementById('modal-guide')) {
-      document.getElementById('modal-guide').classList.remove('open');
-    }
-  },
-  showPrivacy() {
-    document.getElementById('modal-privacy').classList.add('open');
-  },
-  closePrivacy(e) {
-    if (!e || e.target === document.getElementById('modal-privacy')) {
-      document.getElementById('modal-privacy').classList.remove('open');
-    }
+  closeInfoModal(id, e) {
+    const el = document.getElementById(id);
+    if (!e || e.target === el) el.classList.remove('open');
   },
 
   _goToAuth() {
