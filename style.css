@@ -250,6 +250,28 @@ html, body {
   box-shadow: 0 8px 28px rgba(0,0,0,0.35);
 }
 .btn-start:active { transform: scale(0.96); }
+.intro-hero-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+.btn-detail {
+  background: transparent;
+  color: rgba(255,255,255,0.85);
+  border: 1.5px solid rgba(255,255,255,0.40);
+  border-radius: 50px;
+  padding: 13px 40px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  transition: background 0.15s, border-color 0.15s;
+  touch-action: manipulation;
+}
+.btn-detail:active { background: rgba(255,255,255,0.10); }
 .intro-note {
   text-align: center;
   color: rgba(255,255,255,0.60);

@@ -20,6 +20,10 @@
       <h1 class="intro-hero-title">KiruKi</h1>
       <p class="intro-hero-tag">着る気象アプリ</p>
       <p class="intro-hero-copy">今日の天気に合った服装を<br>AIが毎朝提案します</p>
+      <div class="intro-hero-btns">
+        <button class="btn-start" onclick="App.goToAuth()">無料ではじめる →</button>
+        <button class="btn-detail" onclick="document.getElementById('lp-details').scrollIntoView({behavior:'smooth'})">詳しく見る ↓</button>
+      </div>
     </div>
 
     <!-- Feature grid -->
@@ -57,7 +61,7 @@
     </div>
 
     <!-- ── なぜ必要か ── -->
-    <div class="lp-section">
+    <div id="lp-details" class="lp-section">
       <p class="lp-label">なぜこのアプリが必要か</p>
       <h2 class="lp-title">「今日、何着よう…」<br>その悩みを毎朝解決する</h2>
       <div class="lp-pain-list">
