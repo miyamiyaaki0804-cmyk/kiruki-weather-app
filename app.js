@@ -1152,11 +1152,15 @@ const App = {
               return t ? `<span class="occasion-tag-display">${t.emoji}${t.label}</span>` : '';
             }).join('')}</div>` : '';
 
+        const outfitHtml = item.outfit
+          ? `<div class="wardrobe-outfit">${item.outfit}</div>` : '';
+
         card.innerHTML = `
           ${photoContent}
           <div class="wardrobe-info">
             <div class="wardrobe-date">${item.date}</div>
             <div class="wardrobe-temp">${item.icon} ${item.temp}°C</div>
+            ${outfitHtml}
             <div class="wardrobe-feeling">${FEELING_LABELS[item.feeling] || ''}</div>
             ${occasionHtml}
           </div>
