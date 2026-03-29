@@ -407,6 +407,92 @@ html, body {
 .lp-story-card p { font-size: 0.88rem; color: rgba(255,255,255,0.86); line-height: 1.8; margin: 0; }
 .lp-story-card strong { color: #BAE6FD; }
 
+/* AI stat grid */
+.lp-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.lp-stat-card {
+  background: rgba(255,255,255,0.10);
+  border: 1.5px solid rgba(255,255,255,0.20);
+  border-radius: 16px;
+  padding: 16px 14px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+.lp-stat-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.lp-stat-unit {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #93C5FD;
+  margin-left: 2px;
+}
+.lp-stat-desc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.5;
+}
+
+/* Accuracy bar */
+.lp-accuracy-box {
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lp-accuracy-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.lp-accuracy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lp-accuracy-label {
+  font-size: 0.70rem;
+  color: rgba(255,255,255,0.65);
+  width: 56px;
+  flex-shrink: 0;
+}
+.lp-accuracy-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.lp-accuracy-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+.lp-accuracy-pct {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #6EE7B7;
+  width: 38px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.lp-accuracy-note {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.40);
+  line-height: 1.4;
+}
+
 /* AI credibility */
 .lp-ai-lead {
   font-size: 0.86rem;

@@ -109,9 +109,55 @@
 
     <!-- ── AIの信憑性 ── -->
     <div class="lp-section">
-      <p class="lp-label">AIの提案根拠</p>
-      <h2 class="lp-title">なぜその服装を<br>すすめるのか</h2>
-      <p class="lp-ai-lead">気温帯ごとの標準的な服装基準をベースに、天気・朝昼夜の気温差・あなたの体感記録を組み合わせて提案します。</p>
+      <p class="lp-label">AIの提案精度</p>
+      <h2 class="lp-title">数字で見る<br>提案の確かさ</h2>
+
+      <!-- 精度スタット -->
+      <div class="lp-stat-grid">
+        <div class="lp-stat-card">
+          <div class="lp-stat-num">7<span class="lp-stat-unit">段階</span></div>
+          <div class="lp-stat-desc">気温帯を<br>きめ細かく網羅</div>
+        </div>
+        <div class="lp-stat-card">
+          <div class="lp-stat-num">3<span class="lp-stat-unit">時間帯</span></div>
+          <div class="lp-stat-desc">朝・昼・夜で<br>それぞれ最適化</div>
+        </div>
+        <div class="lp-stat-card">
+          <div class="lp-stat-num">5<span class="lp-stat-unit">段階</span></div>
+          <div class="lp-stat-desc">体感フィードバック<br>で精度を向上</div>
+        </div>
+        <div class="lp-stat-card">
+          <div class="lp-stat-num">±4<span class="lp-stat-unit">°C</span></div>
+          <div class="lp-stat-desc">似た気温の日の<br>過去コーデを参照</div>
+        </div>
+      </div>
+
+      <!-- 精度向上バー -->
+      <div class="lp-accuracy-box">
+        <div class="lp-accuracy-title">📈 記録が増えるほど「あなた専用」になる</div>
+        <div class="lp-accuracy-row">
+          <div class="lp-accuracy-label">AIのみ</div>
+          <div class="lp-accuracy-bar-wrap">
+            <div class="lp-accuracy-bar" style="width:62%;background:linear-gradient(90deg,#3B82F6,#6366F1)"></div>
+          </div>
+          <div class="lp-accuracy-pct">標準</div>
+        </div>
+        <div class="lp-accuracy-row">
+          <div class="lp-accuracy-label">記録 10件</div>
+          <div class="lp-accuracy-bar-wrap">
+            <div class="lp-accuracy-bar" style="width:78%;background:linear-gradient(90deg,#6366F1,#8B5CF6)"></div>
+          </div>
+          <div class="lp-accuracy-pct">↑UP</div>
+        </div>
+        <div class="lp-accuracy-row">
+          <div class="lp-accuracy-label">記録 30件+</div>
+          <div class="lp-accuracy-bar-wrap">
+            <div class="lp-accuracy-bar" style="width:95%;background:linear-gradient(90deg,#8B5CF6,#EC4899)"></div>
+          </div>
+          <div class="lp-accuracy-pct">最高精度</div>
+        </div>
+        <div class="lp-accuracy-note">※ 体感「ちょうど良い」の記録数に基づく個人最適化のイメージ</div>
+      </div>
 
       <!-- 気温帯テーブル -->
       <div class="lp-temp-table">
