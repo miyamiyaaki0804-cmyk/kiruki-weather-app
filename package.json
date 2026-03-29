@@ -12,6 +12,7 @@
     "topojson-client": "^3.1.0"
   },
   "devDependencies": {
+    "puppeteer": "^24.40.0",
     "serve": "^14.2.0"
   },
   "license": "MIT",
