@@ -3,191 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 1200px; height: 630px; overflow: hidden; }
-    body {
-      background: linear-gradient(135deg, #050E1F 0%, #0F2456 35%, #1A3880 65%, #1D4ED8 100%);
-      font-family: 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', 'Helvetica Neue', Arial, sans-serif;
-      color: white;
-      position: relative;
-    }
-    .orb1 {
-      position: absolute;
-      width: 560px; height: 560px;
-      background: radial-gradient(circle, rgba(99,102,241,0.38) 0%, transparent 70%);
-      top: -160px; right: -80px;
-      pointer-events: none;
-    }
-    .orb2 {
-      position: absolute;
-      width: 420px; height: 420px;
-      background: radial-gradient(circle, rgba(59,130,246,0.28) 0%, transparent 70%);
-      bottom: -120px; left: 60px;
-      pointer-events: none;
-    }
-    .rings {
-      position: absolute;
-      top: -60px; right: -60px;
-      pointer-events: none;
-    }
-    .layout {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      height: 100%;
-      align-items: center;
-      padding: 0 68px;
-      gap: 56px;
-    }
-
-    /* Icon circle */
-    .icon-wrap {
-      flex-shrink: 0;
-      position: relative;
-    }
-    .icon-glow {
-      position: absolute;
-      inset: -40px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(99,102,241,0.30) 0%, transparent 70%);
-    }
-    .icon-circle {
-      width: 268px;
-      height: 268px;
-      background: rgba(255,255,255,0.07);
-      border: 1.5px solid rgba(255,255,255,0.20);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 132px;
-      line-height: 1;
-      box-shadow: 0 0 60px rgba(99,102,241,0.35), 0 0 120px rgba(99,102,241,0.15);
-      position: relative;
-      z-index: 1;
-    }
-    /* Weather mini icons */
-    .weather-sun {
-      position: absolute;
-      top: 8px; right: -8px;
-      font-size: 38px;
-      filter: drop-shadow(0 0 8px rgba(251,191,36,0.6));
-    }
-    .weather-cloud {
-      position: absolute;
-      bottom: 16px; left: -16px;
-      font-size: 30px;
-      opacity: 0.85;
-    }
-    .weather-therm {
-      position: absolute;
-      top: 48px; left: -20px;
-      font-size: 28px;
-      opacity: 0.9;
-    }
-
-    /* Content */
-    .content { flex: 1; }
-    .label {
-      font-size: 13px;
-      letter-spacing: 5px;
-      color: #93C5FD;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .title {
-      font-size: 104px;
-      font-weight: 900;
-      letter-spacing: -5px;
-      line-height: 0.92;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, #ffffff 0%, #C7D2FE 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: none;
-    }
-    .tagline-jp {
-      font-size: 20px;
-      color: rgba(255,255,255,0.80);
-      margin-bottom: 22px;
-      line-height: 1.65;
-      letter-spacing: 0.5px;
-    }
-    .tagline-jp strong {
-      color: #BAE6FD;
-      font-weight: 700;
-    }
-    .divider {
-      width: 100%;
-      height: 1px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.20), transparent);
-      margin-bottom: 20px;
-    }
-    .badges {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      background: rgba(255,255,255,0.11);
-      border: 1.5px solid rgba(255,255,255,0.22);
-      border-radius: 50px;
-      padding: 7px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
-    .badge.accent {
-      background: rgba(99,102,241,0.30);
-      border-color: rgba(165,180,252,0.50);
-    }
-    .url {
-      font-size: 13px;
-      color: rgba(255,255,255,0.32);
-      letter-spacing: 0.8px;
-    }
+    * { margin: 0; padding: 0; }
+    html, body { width: 1200px; height: 630px; overflow: hidden; background: #050E1F; }
+    canvas { display: block; }
   </style>
 </head>
 <body>
-  <div class="orb1"></div>
-  <div class="orb2"></div>
-  <!-- Decorative rings (SVG) -->
-  <svg class="rings" width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="200" cy="200" r="190" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-    <circle cx="200" cy="200" r="140" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-    <circle cx="200" cy="200" r="90"  stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
-  </svg>
+<canvas id="c" width="1200" height="630"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 1200, H = 630;
+const cx = W / 2, cy = H / 2 - 36;
 
-  <div class="layout">
-    <!-- Icon -->
-    <div class="icon-wrap">
-      <div class="icon-glow"></div>
-      <div class="icon-circle">👕</div>
-      <div class="weather-sun">☀️</div>
-      <div class="weather-cloud">🌤️</div>
-      <div class="weather-therm">🌡️</div>
-    </div>
+// ── Background ──────────────────────────────────────────────────
+const bg = ctx.createRadialGradient(cx, cy - 60, 0, cx, cy, 520);
+bg.addColorStop(0,   '#0F2456');
+bg.addColorStop(0.5, '#081A40');
+bg.addColorStop(1,   '#020B1E');
+ctx.fillStyle = bg;
+ctx.fillRect(0, 0, W, H);
 
-    <!-- Content -->
-    <div class="content">
-      <div class="label">着る気象アプリ</div>
-      <div class="title">KiruKi</div>
-      <div class="tagline-jp">
-        今日の天気に合った服装を、<strong>AIが毎朝提案</strong>します。<br>
-        使うほどあなた専用になる服装パートナー。
-      </div>
-      <div class="divider"></div>
-      <div class="badges">
-        <div class="badge">🌡️ AI服装提案</div>
-        <div class="badge">📸 コーデ記録</div>
-        <div class="badge accent">🧠 使うほど精度UP</div>
-        <div class="badge">🗾 全国気温マップ</div>
-      </div>
-      <div class="url">kiruki-weather-app-dyou.vercel.app</div>
-    </div>
-  </div>
+// subtle corner orbs
+const orbL = ctx.createRadialGradient(0, H, 0, 0, H, 320);
+orbL.addColorStop(0, 'rgba(59,130,246,0.18)');
+orbL.addColorStop(1, 'transparent');
+ctx.fillStyle = orbL;
+ctx.fillRect(0, 0, W, H);
+
+const orbR = ctx.createRadialGradient(W, 0, 0, W, 0, 380);
+orbR.addColorStop(0, 'rgba(99,102,241,0.20)');
+orbR.addColorStop(1, 'transparent');
+ctx.fillStyle = orbR;
+ctx.fillRect(0, 0, W, H);
+
+// ── Aperture segments ────────────────────────────────────────────
+const R_OUT = 206;   // outer radius
+const R_IN  = 90;    // inner radius (central circle)
+const N     = 6;     // blade count
+const GAP   = 7;     // gap in degrees
+
+// Color palette: alternating blue/indigo shades
+const COLORS = [
+  ['#1D4ED8', '#4338CA'],
+  ['#2563EB', '#6366F1'],
+  ['#1E40AF', '#3730A3'],
+  ['#2563EB', '#4F46E5'],
+  ['#1D4ED8', '#4338CA'],
+  ['#2563EB', '#6366F1'],
+];
+
+// outer decorative ring
+ctx.beginPath();
+ctx.arc(cx, cy, R_OUT + 14, 0, Math.PI * 2);
+ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+ctx.lineWidth = 1.5;
+ctx.stroke();
+
+ctx.beginPath();
+ctx.arc(cx, cy, R_OUT + 28, 0, Math.PI * 2);
+ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+ctx.lineWidth = 1;
+ctx.stroke();
+
+// draw each blade/segment
+for (let i = 0; i < N; i++) {
+  const degStart = i * (360 / N) + GAP / 2;
+  const degEnd   = (i + 1) * (360 / N) - GAP / 2;
+  const aStart = degStart * Math.PI / 180;
+  const aEnd   = degEnd   * Math.PI / 180;
+
+  // gradient from inner-arc-midpoint to outer-arc-midpoint
+  const aMid = (aStart + aEnd) / 2;
+  const gx1 = cx + R_IN  * Math.cos(aMid);
+  const gy1 = cy + R_IN  * Math.sin(aMid);
+  const gx2 = cx + R_OUT * Math.cos(aMid);
+  const gy2 = cy + R_OUT * Math.sin(aMid);
+
+  const grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2);
+  grad.addColorStop(0, COLORS[i][0]);
+  grad.addColorStop(1, COLORS[i][1]);
+
+  ctx.beginPath();
+  ctx.moveTo(cx + R_IN * Math.cos(aStart), cy + R_IN * Math.sin(aStart));
+  ctx.lineTo(cx + R_OUT * Math.cos(aStart), cy + R_OUT * Math.sin(aStart));
+  ctx.arc(cx, cy, R_OUT, aStart, aEnd);
+  ctx.lineTo(cx + R_IN * Math.cos(aEnd), cy + R_IN * Math.sin(aEnd));
+  ctx.arc(cx, cy, R_IN, aEnd, aStart, true);
+  ctx.closePath();
+
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // subtle highlight on outer edge
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R_OUT, aStart, aEnd);
+  ctx.stroke();
+}
+
+// ── Central circle ───────────────────────────────────────────────
+const innerGrad = ctx.createRadialGradient(cx, cy - 20, 0, cx, cy, R_IN);
+innerGrad.addColorStop(0, '#0C1A3D');
+innerGrad.addColorStop(1, '#060F27');
+ctx.beginPath();
+ctx.arc(cx, cy, R_IN - 1, 0, Math.PI * 2);
+ctx.fillStyle = innerGrad;
+ctx.fill();
+ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+ctx.lineWidth = 1.5;
+ctx.stroke();
+
+// ── "K" letter ───────────────────────────────────────────────────
+const kGrad = ctx.createLinearGradient(cx - 40, cy - 50, cx + 40, cy + 50);
+kGrad.addColorStop(0, '#FFFFFF');
+kGrad.addColorStop(0.5, '#C7D2FE');
+kGrad.addColorStop(1, '#93C5FD');
+
+ctx.fillStyle = kGrad;
+ctx.font = '900 86px "Helvetica Neue", "Arial Black", Arial, sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText('K', cx, cy + 3);
+
+// ── Text below logo ──────────────────────────────────────────────
+const textY = cy + R_OUT + 28;
+
+// "KiruKi" title
+const titleGrad = ctx.createLinearGradient(cx - 120, 0, cx + 120, 0);
+titleGrad.addColorStop(0, '#FFFFFF');
+titleGrad.addColorStop(1, '#C7D2FE');
+ctx.fillStyle = titleGrad;
+ctx.font = '900 58px "Helvetica Neue", "Arial Black", Arial, sans-serif';
+ctx.letterSpacing = '-2px';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'top';
+ctx.fillText('KiruKi', cx, textY);
+
+// subtitle
+ctx.fillStyle = 'rgba(147,197,253,0.85)';
+ctx.font = '600 20px "Hiragino Sans", "Yu Gothic", "Meiryo", "Helvetica Neue", Arial, sans-serif';
+ctx.letterSpacing = '4px';
+ctx.fillText('着る気象アプリ', cx, textY + 68);
+</script>
 </body>
 </html>
